@@ -9,55 +9,114 @@
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
         background-color: #f7fafc;
         margin: 0;
-        padding: 10px 8px;
+        padding: 8px 6px;
         color: #2d3748;
       }
       .container {
-        max-width: 460px;
+        max-width: 480px;
         margin: 0 auto;
         background: #ffffff;
         border-radius: 12px;
-        padding: 14px 10px;
+        padding: 12px 8px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.06);
       }
       h2.title {
         text-align: center;
-        font-size: 1.15rem;
+        font-size: 1.1rem;
         font-weight: bold;
         color: #2d3748;
-        margin: 2px 0 14px 0;
-        letter-spacing: 0.5px;
+        margin: 0 0 10px 0;
       }
 
-      /* 絞り込みバー */
-      .filter-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1.25fr;
+      /* アクションバー（保存・読込・クリア） */
+      .action-bar {
+        display: flex;
         gap: 6px;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
+      }
+      .action-btn {
+        flex: 1;
+        font-size: 0.72rem;
+        padding: 6px 2px;
+        border-radius: 6px;
+        border: 1px solid #cbd5e0;
+        background: #fff;
+        color: #4a5568;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+      }
+      .action-btn:active { background: #edf2f7; }
+      .btn-save { border-color: #bee3f8; color: #2b6cb0; }
+      .btn-load { border-color: #c6f6d5; color: #276749; }
+      .btn-clear { border-color: #fed7d7; color: #9b2c2c; }
+
+      /* 絞り込みエリア */
+      .filter-box {
         background: #f8fafc;
         padding: 8px 6px;
         border-radius: 8px;
         border: 1px solid #edf2f7;
+        margin-bottom: 10px;
+      }
+      .filter-mode-switch {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 6px;
+        padding-bottom: 6px;
+        border-bottom: 1px dashed #e2e8f0;
+      }
+      .filter-mode-switch label {
+        font-size: 0.68rem;
+        font-weight: bold;
+        color: #718096;
+      }
+      .switch-btn-group {
+        display: flex;
+        border-radius: 4px;
+        overflow: hidden;
+        border: 1px solid #cbd5e0;
+      }
+      .switch-btn {
+        font-size: 0.65rem;
+        padding: 3px 8px;
+        background: #fff;
+        border: none;
+        cursor: pointer;
+        color: #718096;
+      }
+      .switch-btn.active {
+        background: #3182ce;
+        color: #fff;
+        font-weight: bold;
+      }
+
+      .filter-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1.25fr;
+        gap: 4px;
       }
       .filter-group {
         display: flex;
         flex-direction: column;
       }
       .filter-group label {
-        font-size: 0.68rem;
+        font-size: 0.62rem;
         color: #718096;
-        margin-bottom: 3px;
+        margin-bottom: 2px;
         text-align: center;
       }
       .filter-group select {
-        font-size: 0.72rem;
-        padding: 4px 2px;
-        border-radius: 6px;
+        font-size: 0.7rem;
+        padding: 3px 2px;
+        border-radius: 4px;
         border: 1px solid #cbd5e0;
         background: #fff;
-        height: 28px;
-        color: #2d3748;
+        height: 26px;
       }
 
       /* 5人スロット */
@@ -65,12 +124,12 @@
         display: grid;
         grid-template-columns: repeat(5, 1fr);
         gap: 4px;
-        margin-bottom: 14px;
+        margin-bottom: 12px;
       }
       .slot-card {
         border: 1px dashed #cbd5e0;
         border-radius: 6px;
-        padding: 6px 2px;
+        padding: 5px 2px;
         text-align: center;
         display: flex;
         flex-direction: column;
@@ -99,34 +158,44 @@
         color: #a0aec0;
       }
       .slot-atk {
-        font-size: 0.65rem;
+        font-size: 0.62rem;
         font-weight: bold;
         color: #3182ce;
-        margin: 4px 0 2px 0;
+        margin: 3px 0 2px 0;
       }
       .slot-select {
         width: 100%;
-        font-size: 0.65rem;
-        padding: 3px 1px;
+        font-size: 0.62rem;
+        padding: 2px 1px;
         border: 1px dashed #cbd5e0;
         border-radius: 4px;
         background: #fff;
         text-align: center;
-        color: #4a5568;
       }
 
-      /* 下部テーブル */
-      .result-title {
-        text-align: center;
-        font-size: 0.85rem;
-        font-weight: bold;
-        color: #3182ce;
-        margin: 12px 0 8px 0;
+      /* 表示モード切替タブ */
+      .view-tabs {
         display: flex;
-        align-items: center;
-        justify-content: center;
         gap: 4px;
+        margin-bottom: 8px;
       }
+      .view-tab {
+        flex: 1;
+        font-size: 0.7rem;
+        padding: 6px 2px;
+        text-align: center;
+        background: #edf2f7;
+        border-radius: 6px;
+        color: #718096;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      .view-tab.active {
+        background: #3182ce;
+        color: #fff;
+      }
+
+      /* テーブルスタイル */
       table.result-table {
         width: 100%;
         border-collapse: collapse;
@@ -136,32 +205,75 @@
       table.result-table th {
         background: #3182ce;
         color: #fff;
-        padding: 6px 2px;
+        padding: 5px 1px;
         font-weight: normal;
         border: 1px solid #2b6cb0;
       }
       table.result-table td {
-        padding: 6px 2px;
+        padding: 5px 1px;
         border: 1px solid #e2e8f0;
+      }
+      .table-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+        display: block;
+        margin: 0 auto;
+        cursor: pointer;
+        border: 1px solid #cbd5e0;
+      }
+      .val-cell {
+        color: #e53e3e;
         font-weight: bold;
       }
-      td.chara-name-cell {
-        text-align: left;
-        padding-left: 6px;
-        color: #2d3748;
-        font-weight: normal;
-        line-height: 1.25;
-      }
-      td.val-cell {
-        color: #e53e3e;
-      }
+      .diff-pos { color: #e53e3e; font-size: 0.6rem; display: block; }
+      .diff-neg { color: #3182ce; font-size: 0.6rem; display: block; }
+      .diff-eq { color: #a0aec0; font-size: 0.6rem; display: block; }
+
       .empty-msg {
         text-align: center;
         color: #a0aec0;
-        padding: 16px;
-        font-size: 0.78rem;
+        padding: 14px;
+        font-size: 0.75rem;
         border: 1px solid #edf2f7;
         border-radius: 6px;
+      }
+
+      /* 自キャラ実数値入力フォーム */
+      .base-inputs-container {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 8px;
+        margin-bottom: 10px;
+      }
+      .base-input-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 6px;
+      }
+      .base-input-row:last-child { margin-bottom: 0; }
+      .base-input-thumb {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+      .base-stat-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 3px;
+        flex: 1;
+      }
+      .base-stat-input {
+        width: 100%;
+        font-size: 0.65rem;
+        padding: 3px 2px;
+        text-align: center;
+        border: 1px solid #cbd5e0;
+        border-radius: 4px;
       }
 
       /* 詳細モーダル */
@@ -181,7 +293,6 @@
         border-radius: 12px;
         width: 88%;
         max-width: 320px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.25);
         text-align: center;
       }
       .modal-icon {
@@ -190,31 +301,27 @@
         border-radius: 50%;
         object-fit: cover;
         margin-bottom: 6px;
-        border: 1px solid #edf2f7;
       }
       .modal-name {
-        font-size: 0.98rem;
+        font-size: 0.95rem;
         font-weight: bold;
         margin: 0;
-        color: #2d3748;
       }
       .modal-sub {
         font-size: 0.72rem;
         color: #718096;
-        margin: 4px 0 10px 0;
+        margin: 3px 0 8px 0;
       }
       .modal-stats {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        row-gap: 5px;
-        column-gap: 12px;
-        font-size: 0.76rem;
+        row-gap: 4px;
+        font-size: 0.75rem;
         text-align: left;
         background: #f8fafc;
         padding: 8px 12px;
         border-radius: 6px;
         margin-bottom: 8px;
-        border: 1px solid #edf2f7;
       }
       .modal-range {
         font-size: 0.7rem;
@@ -222,9 +329,9 @@
         text-align: left;
         background: #fff;
         border: 1px solid #e2e8f0;
-        padding: 6px 8px;
+        padding: 6px;
         border-radius: 6px;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
         line-height: 1.35;
       }
       .modal-close-btn {
@@ -232,17 +339,16 @@
         color: #fff;
         border: none;
         border-radius: 6px;
-        padding: 6px 24px;
-        font-size: 0.8rem;
+        padding: 6px 20px;
+        font-size: 0.78rem;
         cursor: pointer;
         font-weight: bold;
       }
 
-      /* 最下部広告枠 */
       .ad-footer {
-        margin-top: 24px;
+        margin-top: 20px;
         text-align: center;
-        padding: 8px 0;
+        padding: 6px 0;
         border-top: 1px solid #edf2f7;
       }
       .ad-label {
@@ -256,54 +362,70 @@
     <div class="container">
       <h2 class="title">パーティ パッシブ判定計算</h2>
 
+      <!-- アクションバー -->
+      <div class="action-bar">
+        <button class="action-btn btn-save" onclick="saveCurrentParty()">💾 PT保存</button>
+        <button class="action-btn btn-load" onclick="loadSavedParty()">📂 PT読込</button>
+        <button class="action-btn btn-clear" onclick="clearParty()">🗑️ クリア</button>
+      </div>
+
       <!-- 絞り込みバー -->
-      <div class="filter-row">
-        <div class="filter-group">
-          <label>種族絞り込み</label>
-          <select id="tribeFilter" onchange="onFilterChange()">
-            <option value="すべて">すべて</option>
-            <option value="神族">神族</option>
-            <option value="魔神">魔神</option>
-            <option value="魔族">魔族</option>
-            <option value="異端">異端</option>
-            <option value="聖人">聖人</option>
-            <option value="飛天">飛天</option>
-            <option value="魔獣">魔獣</option>
-            <option value="聖獣">聖獣</option>
-            <option value="精霊">精霊</option>
-            <option value="鬼族">鬼族</option>
-          </select>
+      <div class="filter-box">
+        <div class="filter-mode-switch">
+          <label>🔍 絞り込み基準:</label>
+          <div class="switch-btn-group">
+            <button id="modeCharaBtn" class="switch-btn active" onclick="setFilterMode('chara')">キャラ自身</button>
+            <button id="modePassiveBtn" class="switch-btn" onclick="setFilterMode('passive')">パッシブ対象</button>
+          </div>
         </div>
-        <div class="filter-group">
-          <label>属性絞り込み</label>
-          <select id="elementFilter" onchange="onFilterChange()">
-            <option value="すべて">すべて</option>
-            <option value="闇属性">闇属性</option>
-            <option value="無属性">無属性</option>
-            <option value="光属性">光属性</option>
-            <option value="風属性">風属性</option>
-            <option value="火属性">火属性</option>
-            <option value="水属性">水属性</option>
-            <option value="雷属性">雷属性</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label>並び替え</label>
-          <select id="sortFilter" onchange="onFilterChange()">
-            <option value="default">標準 (登録順)</option>
-            <option value="atk_desc">攻撃 (高い順)</option>
-            <option value="atk_asc">攻撃 (低い順)</option>
-            <option value="spd_desc">素早さ (高い順)</option>
-            <option value="spd_asc">素早さ (低い順)</option>
-            <option value="crt_desc">Crt (高い順)</option>
-            <option value="name_asc">名前 (五十音順)</option>
-          </select>
+
+        <div class="filter-row">
+          <div class="filter-group">
+            <label>種族</label>
+            <select id="tribeFilter" onchange="onFilterChange()">
+              <option value="すべて">すべて</option>
+              <option value="神族">神族</option>
+              <option value="魔神">魔神</option>
+              <option value="魔族">魔族</option>
+              <option value="異端">異端</option>
+              <option value="聖人">聖人</option>
+              <option value="飛天">飛天</option>
+              <option value="魔獣">魔獣</option>
+              <option value="聖獣">聖獣</option>
+              <option value="精霊">精霊</option>
+              <option value="鬼族">鬼族</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>属性</label>
+            <select id="elementFilter" onchange="onFilterChange()">
+              <option value="すべて">すべて</option>
+              <option value="闇属性">闇属性</option>
+              <option value="無属性">無属性</option>
+              <option value="光属性">光属性</option>
+              <option value="風属性">風属性</option>
+              <option value="火属性">火属性</option>
+              <option value="水属性">水属性</option>
+              <option value="雷属性">雷属性</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>並び替え</label>
+            <select id="sortFilter" onchange="onFilterChange()">
+              <option value="default">標準 (登録順)</option>
+              <option value="atk_desc">攻撃 (高い順)</option>
+              <option value="atk_asc">攻撃 (低い順)</option>
+              <option value="spd_desc">素早さ (高い順)</option>
+              <option value="spd_asc">素早さ (低い順)</option>
+              <option value="crt_desc">Crt (高い順)</option>
+              <option value="name_asc">名前 (五十音順)</option>
+            </select>
+          </div>
         </div>
       </div>
 
       <!-- 5人スロット -->
       <div class="slot-grid">
-        <!-- スロット1〜5 -->
         <script>
           for (let i = 0; i < 5; i++) {
             document.write(`
@@ -321,18 +443,28 @@
         </script>
       </div>
 
-      <!-- 適用後パッシブ補正一覧テーブル -->
-      <div class="result-section">
-        <div class="result-title">⚡ 各キャラの適用後パッシブ補正一覧</div>
-        <div id="tableContainer">
-          <div class="empty-msg">キャラを選択してください</div>
-        </div>
+      <!-- 表示モード切替タブ -->
+      <div class="view-tabs">
+        <div id="tabPercent" class="view-tab active" onclick="setViewMode('percent')">補正率 (%)</div>
+        <div id="tabCompare" class="view-tab" onclick="setViewMode('compare')">⚖️ 保存PT比較</div>
+        <div id="tabStatCalc" class="view-tab" onclick="setViewMode('statCalc')">✏️ 実数値計算</div>
       </div>
 
-      <!-- 広告枠 -->
+      <!-- 実数値入力アコーディオン（実数値モード時のみ表示） -->
+      <div id="baseStatInputsArea" class="base-inputs-container" style="display:none;">
+        <div style="font-size:0.68rem; font-weight:bold; color:#4a5568; margin-bottom:6px;">自キャラの基礎ステータスを入力（攻撃/防御/素早さ/HP/SP/Crt）</div>
+        <div id="statInputRows"></div>
+      </div>
+
+      <!-- 結果テーブルエリア -->
+      <div id="tableContainer">
+        <div class="empty-msg">キャラを選択してください</div>
+      </div>
+
+      <!-- 最下部広告枠 -->
       <div class="ad-footer">
         <div class="ad-label">スポンサーリンク</div>
-        <div style="font-size:11px; color:#cbd5e0; padding:6px; border:1px dashed #e2e8f0; border-radius:4px;">広告枠 (320×50px)</div>
+        <div style="font-size:10px; color:#cbd5e0; padding:6px; border:1px dashed #e2e8f0; border-radius:4px;">広告枠 (320×50px)</div>
       </div>
     </div>
 
@@ -361,13 +493,22 @@
       const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwbcXTp6lh0QynoRF2B2dpTWpEGcpcK4W2WXaf9EzW0oEGAS8WW8jDG0MFwhQcKOo1x3g/exec";
 
       let masterData = [];
-      let party = [null, null, null, null, null]; // 5人スロットに選ばれたキャラのインデックス
+      let party = [null, null, null, null, null];
+      let baseStats = [
+        { atk: 0, def: 0, spd: 0, hp: 0, sp: 0, crt: 0 },
+        { atk: 0, def: 0, spd: 0, hp: 0, sp: 0, crt: 0 },
+        { atk: 0, def: 0, spd: 0, hp: 0, sp: 0, crt: 0 },
+        { atk: 0, def: 0, spd: 0, hp: 0, sp: 0, crt: 0 },
+        { atk: 0, def: 0, spd: 0, hp: 0, sp: 0, crt: 0 }
+      ];
+
+      let filterMode = 'chara'; // 'chara' または 'passive'
+      let currentView = 'percent'; // 'percent', 'compare', 'statCalc'
 
       window.onload = function() {
         fetch(GAS_API_URL)
           .then(res => res.json())
           .then(data => {
-            // masterDataにインデックスを付与
             masterData = data.map((item, idx) => ({ ...item, originalIdx: idx }));
             updateAllSelects();
           })
@@ -377,16 +518,45 @@
           });
       };
 
-      // フィルター＆ソート済みリストの取得
+      // 絞り込みモード切替
+      function setFilterMode(mode) {
+        filterMode = mode;
+        document.getElementById('modeCharaBtn').className = `switch-btn ${mode === 'chara' ? 'active' : ''}`;
+        document.getElementById('modePassiveBtn').className = `switch-btn ${mode === 'passive' ? 'active' : ''}`;
+        updateAllSelects();
+      }
+
+      // 表示タブ切替
+      function setViewMode(mode) {
+        currentView = mode;
+        document.getElementById('tabPercent').className = `view-tab ${mode === 'percent' ? 'active' : ''}`;
+        document.getElementById('tabCompare').className = `view-tab ${mode === 'compare' ? 'active' : ''}`;
+        document.getElementById('tabStatCalc').className = `view-tab ${mode === 'statCalc' ? 'active' : ''}`;
+
+        document.getElementById('baseStatInputsArea').style.display = (mode === 'statCalc') ? 'block' : 'none';
+        if (mode === 'statCalc') renderStatInputRows();
+        recalculatePassives();
+      }
+
+      // 絞り込み・ソート済みリスト生成
       function getFilteredList() {
         const tVal = document.getElementById('tribeFilter').value;
         const eVal = document.getElementById('elementFilter').value;
         const sVal = document.getElementById('sortFilter').value;
 
         let list = masterData.filter(item => {
-          const matchTribe = (tVal === 'すべて') || (item.tribe && item.tribe.includes(tVal));
-          const matchElem = (eVal === 'すべて') || (item.element && item.element.includes(eVal.replace('属性','')));
-          return matchTribe && matchElem;
+          if (filterMode === 'chara') {
+            const matchTribe = (tVal === 'すべて') || (item.tribe && item.tribe.includes(tVal));
+            const matchElem = (eVal === 'すべて') || (item.element && item.element.includes(eVal.replace('属性','')));
+            return matchTribe && matchElem;
+          } else {
+            // パッシブ対象（バフ付与範囲）で絞り込み
+            const range = item.range || '';
+            const matchTribe = (tVal === 'すべて') || range.includes(tVal) || range.includes('全体');
+            const cleanElem = eVal.replace('属性','');
+            const matchElem = (eVal === 'すべて') || range.includes(cleanElem) || range.includes('全体');
+            return matchTribe && matchElem;
+          }
         });
 
         if (sVal === 'atk_desc') list.sort((a,b) => (b.atk||0) - (a.atk||0));
@@ -403,7 +573,6 @@
         updateAllSelects();
       }
 
-      // 5つのセレクトボックスの選択肢を更新
       function updateAllSelects() {
         const filtered = getFilteredList();
 
@@ -433,18 +602,17 @@
         }
       }
 
-      // スロットのキャラ選択変更時
       function onSlotChange(slotIdx) {
         const sel = document.getElementById(`slotSelect_${slotIdx}`);
         const val = sel.value;
         party[slotIdx] = (val === "") ? null : parseInt(val, 10);
 
         updateSlotCardUI(slotIdx);
-        updateAllSelects(); // 他スロットの(選択中)状態を更新
+        updateAllSelects();
+        if (currentView === 'statCalc') renderStatInputRows();
         recalculatePassives();
       }
 
-      // スロットのカード見た目更新
       function updateSlotCardUI(slotIdx) {
         const charaIdx = party[slotIdx];
         const iconBox = document.getElementById(`slotIconBox_${slotIdx}`);
@@ -459,7 +627,7 @@
         }
       }
 
-      // パッシブが味方に適用されるかどうかの判定ロジック
+      // パッシブ適用判定
       function isApplicable(giver, receiver) {
         if (!giver || !receiver) return false;
         const range = giver.range || '';
@@ -470,7 +638,6 @@
         const matchedElems = elements.filter(el => range.includes(el));
         const matchedTribes = tribes.filter(tr => range.includes(tr));
 
-        // 範囲指定がない（全体対象）
         if (matchedElems.length === 0 && matchedTribes.length === 0) return true;
 
         const elemMatch = matchedElems.some(el => (receiver.element || '').includes(el));
@@ -479,7 +646,7 @@
         return elemMatch || tribeMatch;
       }
 
-      // パッシブ合算計算＆テーブル反映
+      // パッシブ計算実行
       function recalculatePassives() {
         const activeMembers = [];
         for (let i = 0; i < 5; i++) {
@@ -488,19 +655,113 @@
           }
         }
 
+        // スロットATK初期化
+        for (let i = 0; i < 5; i++) {
+          document.getElementById(`slotAtk_${i}`).textContent = "ATK: +0%";
+        }
+
         if (activeMembers.length === 0) {
-          for (let i = 0; i < 5; i++) {
-            document.getElementById(`slotAtk_${i}`).textContent = "ATK: +0%";
-          }
           document.getElementById('tableContainer').innerHTML = '<div class="empty-msg">キャラを選択してください</div>';
           return;
         }
 
-        let tableHtml = `
+        // 各キャラのパッシブ合算
+        const results = activeMembers.map(mem => {
+          let atk = 0, def = 0, spd = 0, hp = 0, sp = 0, crt = 0;
+          activeMembers.forEach(other => {
+            if (isApplicable(other.chara, mem.chara)) {
+              atk += other.chara.atk || 0;
+              def += other.chara.def || 0;
+              spd += other.chara.spd || 0;
+              hp += other.chara.hp || 0;
+              sp += other.chara.sp || 0;
+              crt += other.chara.crt || 0;
+            }
+          });
+          document.getElementById(`slotAtk_${mem.slot}`).textContent = `ATK: +${atk}%`;
+          return { ...mem, stats: { atk, def, spd, hp, sp, crt } };
+        });
+
+        if (currentView === 'percent') {
+          renderPercentTable(results);
+        } else if (currentView === 'compare') {
+          renderCompareTable(results);
+        } else if (currentView === 'statCalc') {
+          renderStatCalcTable(results);
+        }
+      }
+
+      // 1. 補正率 (%) テーブル（アイコン表示）
+      function renderPercentTable(results) {
+        let html = `
           <table class="result-table">
             <thead>
               <tr>
-                <th style="width:28%;">キャラ名</th>
+                <th style="width:38px;">キャラ</th>
+                <th>攻撃</th>
+                <th>防御</th>
+                <th>素早さ</th>
+                <th>HP</th>
+                <th>SP</th>
+                <th>Crt</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+        results.forEach(res => {
+          html += `
+            <tr>
+              <td><img class="table-icon" src="${res.chara.icon || 'https://via.placeholder.com/32?text=No'}" onclick="openModal(${res.slot})" onerror="this.src='https://via.placeholder.com/32?text=No'"></td>
+              <td class="val-cell">+${res.stats.atk}%</td>
+              <td class="val-cell">+${res.stats.def}%</td>
+              <td class="val-cell">+${res.stats.spd}%</td>
+              <td class="val-cell">+${res.stats.hp}%</td>
+              <td class="val-cell">+${res.stats.sp}%</td>
+              <td class="val-cell">+${res.stats.crt}%</td>
+            </tr>
+          `;
+        });
+        html += `</tbody></table>`;
+        document.getElementById('tableContainer').innerHTML = html;
+      }
+
+      // 2. 保存PTとの見比べテーブル
+      function renderCompareTable(currentResults) {
+        const savedDataStr = localStorage.getItem('gvg_saved_party');
+        if (!savedDataStr) {
+          document.getElementById('tableContainer').innerHTML = '<div class="empty-msg">「💾 PT保存」されたデータがありません</div>';
+          return;
+        }
+
+        const savedParty = JSON.parse(savedDataStr);
+        // 保存PTのパッシブを仮想計算
+        const savedActive = [];
+        savedParty.forEach((cIdx, sIdx) => {
+          if (cIdx !== null && masterData[cIdx]) {
+            savedActive.push({ slot: sIdx, chara: masterData[cIdx] });
+          }
+        });
+
+        const savedResults = savedActive.map(mem => {
+          let atk = 0, def = 0, spd = 0, hp = 0, sp = 0, crt = 0;
+          savedActive.forEach(other => {
+            if (isApplicable(other.chara, mem.chara)) {
+              atk += other.chara.atk || 0;
+              def += other.chara.def || 0;
+              spd += other.chara.spd || 0;
+              hp += other.chara.hp || 0;
+              sp += other.chara.sp || 0;
+              crt += other.chara.crt || 0;
+            }
+          });
+          return { ...mem, stats: { atk, def, spd, hp, sp, crt } };
+        });
+
+        let html = `
+          <table class="result-table">
+            <thead>
+              <tr>
+                <th style="width:38px;">キャラ</th>
                 <th>攻撃</th>
                 <th>防御</th>
                 <th>素早さ</th>
@@ -512,48 +773,147 @@
             <tbody>
         `;
 
-        // 5つのスロットのATK数値をリセット
-        for (let i = 0; i < 5; i++) {
-          document.getElementById(`slotAtk_${i}`).textContent = "ATK: +0%";
-        }
+        currentResults.forEach(res => {
+          // 同スロットの保存PT補正と比較
+          const savedMatch = savedResults.find(s => s.slot === res.slot);
+          const sStats = savedMatch ? savedMatch.stats : { atk: 0, def: 0, spd: 0, hp: 0, sp: 0, crt: 0 };
 
-        // 各メンバーが味方全員（自身含む）から受けるパッシブを合算
-        activeMembers.forEach(mem => {
-          let atk = 0, def = 0, spd = 0, hp = 0, sp = 0, crt = 0;
+          function renderDiff(cur, sav) {
+            const diff = cur - sav;
+            let diffHtml = '';
+            if (diff > 0) diffHtml = `<span class="diff-pos">▲+${diff}%</span>`;
+            else if (diff < 0) diffHtml = `<span class="diff-neg">▼${diff}%</span>`;
+            else diffHtml = `<span class="diff-eq">±0%</span>`;
+            return `+${cur}% ${diffHtml}`;
+          }
 
-          activeMembers.forEach(other => {
-            if (isApplicable(other.chara, mem.chara)) {
-              atk += other.chara.atk || 0;
-              def += other.chara.def || 0;
-              spd += other.chara.spd || 0;
-              hp += other.chara.hp || 0;
-              sp += other.chara.sp || 0;
-              crt += other.chara.crt || 0;
-            }
-          });
-
-          // スロットカード上の表示更新
-          document.getElementById(`slotAtk_${mem.slot}`).textContent = `ATK: +${atk}%`;
-
-          // 一覧テーブル行追加
-          tableHtml += `
+          html += `
             <tr>
-              <td class="chara-name-cell">${mem.chara.name}</td>
-              <td class="val-cell">+${atk}%</td>
-              <td class="val-cell">+${def}%</td>
-              <td class="val-cell">+${spd}%</td>
-              <td class="val-cell">+${hp}%</td>
-              <td class="val-cell">+${sp}%</td>
-              <td class="val-cell">+${crt}%</td>
+              <td><img class="table-icon" src="${res.chara.icon || 'https://via.placeholder.com/32?text=No'}" onclick="openModal(${res.slot})" onerror="this.src='https://via.placeholder.com/32?text=No'"></td>
+              <td class="val-cell">${renderDiff(res.stats.atk, sStats.atk)}</td>
+              <td class="val-cell">${renderDiff(res.stats.def, sStats.def)}</td>
+              <td class="val-cell">${renderDiff(res.stats.spd, sStats.spd)}</td>
+              <td class="val-cell">${renderDiff(res.stats.hp, sStats.hp)}</td>
+              <td class="val-cell">${renderDiff(res.stats.sp, sStats.sp)}</td>
+              <td class="val-cell">${renderDiff(res.stats.crt, sStats.crt)}</td>
+            </tr>
+          `;
+        });
+        html += `</tbody></table>`;
+        document.getElementById('tableContainer').innerHTML = html;
+      }
+
+      // 3. 実数値入力フォーム描画
+      function renderStatInputRows() {
+        const container = document.getElementById('statInputRows');
+        container.innerHTML = '';
+
+        for (let i = 0; i < 5; i++) {
+          if (party[i] === null || !masterData[party[i]]) continue;
+          const chara = masterData[party[i]];
+
+          const row = document.createElement('div');
+          row.className = 'base-input-row';
+          row.innerHTML = `
+            <img class="base-input-thumb" src="${chara.icon || 'https://via.placeholder.com/28?text=No'}">
+            <div class="base-stat-grid">
+              <input type="number" class="base-stat-input" placeholder="攻" value="${baseStats[i].atk || ''}" oninput="updateBaseStat(${i}, 'atk', this.value)">
+              <input type="number" class="base-stat-input" placeholder="防" value="${baseStats[i].def || ''}" oninput="updateBaseStat(${i}, 'def', this.value)">
+              <input type="number" class="base-stat-input" placeholder="早" value="${baseStats[i].spd || ''}" oninput="updateBaseStat(${i}, 'spd', this.value)">
+              <input type="number" class="base-stat-input" placeholder="HP" value="${baseStats[i].hp || ''}" oninput="updateBaseStat(${i}, 'hp', this.value)">
+              <input type="number" class="base-stat-input" placeholder="SP" value="${baseStats[i].sp || ''}" oninput="updateBaseStat(${i}, 'sp', this.value)">
+              <input type="number" class="base-stat-input" placeholder="Crt" value="${baseStats[i].crt || ''}" oninput="updateBaseStat(${i}, 'crt', this.value)">
+            </div>
+          `;
+          container.appendChild(row);
+        }
+      }
+
+      function updateBaseStat(slotIdx, statKey, val) {
+        baseStats[slotIdx][statKey] = Number(val) || 0;
+        recalculatePassives();
+      }
+
+      // 4. 実数値計算後テーブル
+      function renderStatCalcTable(results) {
+        let html = `
+          <table class="result-table">
+            <thead>
+              <tr>
+                <th style="width:38px;">キャラ</th>
+                <th>攻撃</th>
+                <th>防御</th>
+                <th>素早さ</th>
+                <th>HP</th>
+                <th>SP</th>
+                <th>Crt</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        results.forEach(res => {
+          const b = baseStats[res.slot];
+          function calcFinal(base, percent) {
+            if (!base) return '-';
+            return Math.floor(base * (1 + percent / 100)).toLocaleString();
+          }
+
+          html += `
+            <tr>
+              <td><img class="table-icon" src="${res.chara.icon || 'https://via.placeholder.com/32?text=No'}" onclick="openModal(${res.slot})" onerror="this.src='https://via.placeholder.com/32?text=No'"></td>
+              <td class="val-cell">${calcFinal(b.atk, res.stats.atk)}</td>
+              <td class="val-cell">${calcFinal(b.def, res.stats.def)}</td>
+              <td class="val-cell">${calcFinal(b.spd, res.stats.spd)}</td>
+              <td class="val-cell">${calcFinal(b.hp, res.stats.hp)}</td>
+              <td class="val-cell">${calcFinal(b.sp, res.stats.sp)}</td>
+              <td class="val-cell">${calcFinal(b.crt, res.stats.crt)}</td>
             </tr>
           `;
         });
 
-        tableHtml += `</tbody></table>`;
-        document.getElementById('tableContainer').innerHTML = tableHtml;
+        html += `</tbody></table>`;
+        document.getElementById('tableContainer').innerHTML = html;
       }
 
-      // 詳細ポップアップ
+      // パーティ保存
+      function saveCurrentParty() {
+        if (!party.some(p => p !== null)) return alert('保存するキャラが選択されていません！');
+        localStorage.setItem('gvg_saved_party', JSON.stringify(party));
+        localStorage.setItem('gvg_saved_stats', JSON.stringify(baseStats));
+        alert('現在のパーティを保存しました！');
+      }
+
+      // パーティ読込
+      function loadSavedParty() {
+        const savedData = localStorage.getItem('gvg_saved_party');
+        if (!savedData) return alert('保存されたパーティが見つかりません。');
+        party = JSON.parse(savedData);
+
+        const savedStats = localStorage.getItem('gvg_saved_stats');
+        if (savedStats) baseStats = JSON.parse(savedStats);
+
+        for (let i = 0; i < 5; i++) {
+          updateSlotCardUI(i);
+        }
+        updateAllSelects();
+        if (currentView === 'statCalc') renderStatInputRows();
+        recalculatePassives();
+        alert('保存されたパーティを読み込みました！');
+      }
+
+      // 選択クリア
+      function clearParty() {
+        party = [null, null, null, null, null];
+        for (let i = 0; i < 5; i++) {
+          updateSlotCardUI(i);
+        }
+        updateAllSelects();
+        if (currentView === 'statCalc') renderStatInputRows();
+        recalculatePassives();
+      }
+
+      // モーダル
       function openModal(slotIdx) {
         const charaIdx = party[slotIdx];
         if (charaIdx === null || !masterData[charaIdx]) return;
