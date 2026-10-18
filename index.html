@@ -492,9 +492,6 @@
     <script>
       const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwbcXTp6lh0QynoRF2B2dpTWpEGcpcK4W2WXaf9EzW0oEGAS8WW8jDG0MFwhQcKOo1x3g/exec";
 
-      const ALL_TRIBES = ['神族', '魔神', '魔族', '異端', '聖人', '飛天', '魔獣', '聖獣', '精霊', '鬼族'];
-      const ALL_ELEMS = ['火', '水', '雷', '風', '光', '闇', '無'];
-
       let masterData = [];
       let party = [null, null, null, null, null];
       let baseStats = [
@@ -547,31 +544,82 @@
         recalculatePassives();
       }
 
+      // 精密パッシブ適用判定（giverのパッシブがreceiverに適用されるか）
+      function isApplicable(giver, receiver) {
+        if (!giver || !receiver) return false;
+        const range = giver.range || '';
+
+        // 1. 自分自身のみ対象
+        const isSelfOnly = (range.includes('自身') || range.includes('自分')) && 
+                           !range.includes('同属性') && !range.includes('同種族') && 
+                           !range.includes('同じ') && !range.includes('味方') && !range.includes('全体');
+        if (isSelfOnly) {
+          return giver.originalIdx === receiver.originalIdx;
+        }
+
+        // 2. 「同属性」「同種族」判定
+        if (range.includes('同属性') || range.includes('同じ属性')) {
+          const gElem = (giver.element || '').replace('属性', '');
+          const rElem = (receiver.element || '').replace('属性', '');
+          if (gElem && rElem && gElem !== rElem) return false;
+        }
+        if (range.includes('同種族') || range.includes('同じ種族')) {
+          const gTribe = (giver.tribe || '').replace('族', '');
+          const rTribe = (receiver.tribe || '').replace('族', '');
+          if (gTribe && rTribe && gTribe !== rTribe) return false;
+        }
+
+        // 3. 具体的な属性の検出と判定
+        const targetElems = [];
+        const elemList = ['火', '水', '雷', '風', '光', '闇', '無'];
+        elemList.forEach(el => {
+          if (range.includes(el)) targetElems.push(el);
+        });
+
+        if (targetElems.length > 0) {
+          const rElem = receiver.element || '';
+          const match = targetElems.some(el => rElem.includes(el));
+          if (!match) return false;
+        }
+
+        // 4. 具体的な種族の検出と判定
+        const targetTribes = [];
+        const tribeList = [
+          { name: '神族', keys: ['神族', '神'] },
+          { name: '魔神', keys: ['魔神'] },
+          { name: '魔族', keys: ['魔族'] },
+          { name: '異端', keys: ['異端'] },
+          { name: '聖人', keys: ['聖人'] },
+          { name: '飛天', keys: ['飛天'] },
+          { name: '魔獣', keys: ['魔獣'] },
+          { name: '聖獣', keys: ['聖獣'] },
+          { name: '精霊', keys: ['精霊'] },
+          { name: '鬼族', keys: ['鬼族', '鬼'] }
+        ];
+
+        tribeList.forEach(t => {
+          if (t.keys.some(k => range.includes(k))) {
+            targetTribes.push(t.name);
+          }
+        });
+
+        if (targetTribes.length > 0) {
+          const rTribe = receiver.tribe || '';
+          const match = targetTribes.some(tr => rTribe.includes(tr.replace('族', '')));
+          if (!match) return false;
+        }
+
+        return true;
+      }
+
       function matchPassiveRange(item, selectedTribe, selectedElem) {
-        const range = item.range || '';
-
-        let matchTribe = true;
-        if (selectedTribe !== 'すべて') {
-          const mentionedTribes = ALL_TRIBES.filter(tr => range.includes(tr));
-          if (mentionedTribes.length > 0) {
-            matchTribe = range.includes(selectedTribe);
-          } else {
-            matchTribe = true;
-          }
-        }
-
-        let matchElem = true;
-        if (selectedElem !== 'すべて') {
-          const cleanElem = selectedElem.replace('属性', '');
-          const mentionedElems = ALL_ELEMS.filter(el => range.includes(el));
-          if (mentionedElems.length > 0) {
-            matchElem = range.includes(cleanElem);
-          } else {
-            matchElem = true;
-          }
-        }
-
-        return matchTribe && matchElem;
+        const dummyReceiver = {
+          element: selectedElem === 'すべて' ? '' : selectedElem,
+          tribe: selectedTribe === 'すべて' ? '' : selectedTribe,
+          originalIdx: -1
+        };
+        const dummyGiver = { ...item, originalIdx: -2 };
+        return isApplicable(dummyGiver, dummyReceiver);
       }
 
       function matchCharaOwn(item, selectedTribe, selectedElem) {
@@ -670,21 +718,6 @@
         }
       }
 
-      function isApplicable(giver, receiver) {
-        if (!giver || !receiver) return false;
-        const range = giver.range || '';
-
-        const mentionedElems = ALL_ELEMS.filter(el => range.includes(el));
-        const mentionedTribes = ALL_TRIBES.filter(tr => range.includes(tr));
-
-        if (mentionedElems.length === 0 && mentionedTribes.length === 0) return true;
-
-        const elemMatch = (mentionedElems.length === 0) || mentionedElems.some(el => (receiver.element || '').includes(el));
-        const tribeMatch = (mentionedTribes.length === 0) || mentionedTribes.some(tr => (receiver.tribe || '').includes(tr));
-
-        return elemMatch && tribeMatch;
-      }
-
       function recalculatePassives() {
         const activeMembers = [];
         for (let i = 0; i < 5; i++) {
@@ -727,7 +760,6 @@
         }
       }
 
-      /* 順序: 攻撃 -> HP -> 防御 -> 素早さ -> SP -> Crt */
       function renderPercentTable(results) {
         let html = `
           <table class="result-table">
