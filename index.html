@@ -547,39 +547,37 @@
         recalculatePassives();
       }
 
-      // 精密パッシブ適用判定（giverのバフがreceiverにかかるか）
+      // 実戦編成でのパッシブ合算用判定（giverのバフがreceiverにかかるか）
       function isApplicable(giver, receiver) {
         if (!giver || !receiver) return false;
         const range = String(giver.range || '');
 
-        // 1. 自分自身のみ対象
+        if (range.includes('全般') || range.includes('全体') || range.includes('すべての味方')) {
+          return true;
+        }
+
         const isSelfOnly = (range.includes('自身') || range.includes('自分')) && 
-                           !range.includes('味方') && !range.includes('全体') && 
-                           !range.includes('同属性') && !range.includes('同種族') && !range.includes('同じ');
+                           !range.includes('味方') && !range.includes('同属性') && 
+                           !range.includes('同種族') && !range.includes('同じ');
         if (isSelfOnly) {
           return giver.originalIdx === receiver.originalIdx;
         }
 
-        // 2. 「同属性」「同種族」判定
         if (range.includes('同属性') || range.includes('同じ属性')) {
           const gElem = (giver.element || '').replace('属性', '');
           const rElem = (receiver.element || '').replace('属性', '');
-          if (gElem && rElem && gElem !== rElem) return false;
+          if (gElem && rElem && !rElem.includes(gElem) && !gElem.includes(rElem)) return false;
         }
         if (range.includes('同種族') || range.includes('同じ種族')) {
           const gTribe = (giver.tribe || '').replace('族', '');
           const rTribe = (receiver.tribe || '').replace('族', '');
-          if (gTribe && rTribe && gTribe !== rTribe) return false;
+          if (gTribe && rTribe && !rTribe.includes(gTribe) && !gTribe.includes(rTribe)) return false;
         }
 
-        // 3. 具体的な指定種族の判定（魔神と神族を厳密分離）
         const targetTribes = [];
         ALL_TRIBES.forEach(tr => {
-          if (range.includes(tr)) {
-            targetTribes.push(tr);
-          }
+          if (range.includes(tr)) targetTribes.push(tr);
         });
-        // 「神」単体表記の補完（「魔神」は除く）
         if (!targetTribes.includes('神族') && !targetTribes.includes('魔神') && range.includes('神') && !range.includes('魔神')) {
           targetTribes.push('神族');
         }
@@ -590,7 +588,6 @@
           if (!matchTribe) return false;
         }
 
-        // 4. 具体的な指定属性の判定
         const targetElems = [];
         ALL_ELEMS.forEach(el => {
           if (range.includes(el)) {
@@ -608,31 +605,72 @@
         return true;
       }
 
-      // 絞り込み検索（パッシブ対象）判定
+      // 精密なパッシブ対象絞り込み判定
       function matchPassiveRange(item, selectedTribe, selectedElem) {
-        const cleanTribe = selectedTribe === 'すべて' ? '' : selectedTribe;
-        const cleanElem = selectedElem === 'すべて' ? '' : selectedElem.replace('属性', '');
+        const range = String(item.range || '');
+        const selTribe = selectedTribe === 'すべて' ? '' : selectedTribe;
+        const selElem = selectedElem === 'すべて' ? '' : selectedElem.replace('属性', '');
 
-        // 属性・種族両方が「すべて」の時は全パッシブキャラを対象
-        if (!cleanTribe && !cleanElem) return true;
+        if (!selTribe && !selElem) return true;
 
-        const dummyReceiver = {
-          element: cleanElem || '全属性',
-          tribe: cleanTribe || '全種族',
-          originalIdx: -99
-        };
+        const isGlobal = range.includes('全般') || range.includes('全体') || range.includes('すべての味方');
 
-        if (cleanTribe) {
-          const tribeOk = isApplicable(item, { element: '火水雷風光闇無', tribe: cleanTribe, originalIdx: -99 });
-          if (!tribeOk) return false;
+        // --- 種族適合判定 ---
+        let tribeOk = false;
+        if (!selTribe) {
+          tribeOk = true;
+        } else if (isGlobal) {
+          tribeOk = true;
+        } else if (range.includes('同種族') || range.includes('同じ種族')) {
+          const myTribe = (item.tribe || '').replace('族', '');
+          const targetTribe = selTribe.replace('族', '');
+          tribeOk = myTribe.includes(targetTribe) || targetTribe.includes(myTribe);
+        } else {
+          const mentionedTribes = [];
+          ALL_TRIBES.forEach(tr => {
+            if (range.includes(tr)) mentionedTribes.push(tr);
+          });
+          if (!mentionedTribes.includes('神族') && !mentionedTribes.includes('魔神') && range.includes('神') && !range.includes('魔神')) {
+            mentionedTribes.push('神族');
+          }
+
+          if (mentionedTribes.length > 0) {
+            const cleanSelTribe = selTribe.replace('族', '');
+            tribeOk = mentionedTribes.some(tr => tr.includes(cleanSelTribe) || cleanSelTribe.includes(tr.replace('族', '')));
+          } else {
+            // 種族指定なし（属性のみ指定等）の時、属性検索が同時になされていればOK、種族単体検索時は除外
+            tribeOk = !!selElem;
+          }
         }
 
-        if (cleanElem) {
-          const elemOk = isApplicable(item, { element: cleanElem, tribe: '全種族', originalIdx: -99 });
-          if (!elemOk) return false;
+        // --- 属性適合判定 ---
+        let elemOk = false;
+        if (!selElem) {
+          elemOk = true;
+        } else if (isGlobal) {
+          elemOk = true;
+        } else if (range.includes('同属性') || range.includes('同じ属性')) {
+          const myElem = (item.element || '').replace('属性', '');
+          const targetElem = selElem.replace('属性', '');
+          elemOk = myElem.includes(targetElem) || targetElem.includes(myElem);
+        } else {
+          const mentionedElems = [];
+          ALL_ELEMS.forEach(el => {
+            if (range.includes(el)) {
+              if (el === '無' && !range.includes('無属性') && !range.includes('無・') && !range.includes('・無')) return;
+              mentionedElems.push(el);
+            }
+          });
+
+          if (mentionedElems.length > 0) {
+            elemOk = mentionedElems.includes(selElem);
+          } else {
+            // 属性指定なし（種族のみ指定等）の時、種族検索が同時になされていればOK、属性単体検索時は除外
+            elemOk = !!selTribe;
+          }
         }
 
-        return true;
+        return tribeOk && elemOk;
       }
 
       function matchCharaOwn(item, selectedTribe, selectedElem) {
@@ -1000,7 +1038,7 @@
         document.getElementById('mSpd').textContent = `${chara.spd || 0}%`;
         document.getElementById('mSp').textContent = `${chara.sp || 0}%`;
         document.getElementById('mCrt').textContent = `${chara.crt || 0}%`;
-        document.getElementById('mRange').textContent = chara.range || '全体';
+        document.getElementById('mRange').textContent = chara.range || '全般';
 
         document.getElementById('detailModal').style.display = 'flex';
       }
