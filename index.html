@@ -28,7 +28,7 @@
         margin: 0 0 10px 0;
       }
 
-      /* アクションバー（保存・読込・クリア） */
+      /* アクションバー */
       .action-bar {
         display: flex;
         gap: 6px;
@@ -450,7 +450,7 @@
         <div id="tabStatCalc" class="view-tab" onclick="setViewMode('statCalc')">✏️ 実数値計算</div>
       </div>
 
-      <!-- 実数値入力アコーディオン（実数値モード時のみ表示） -->
+      <!-- 実数値入力アコーディオン -->
       <div id="baseStatInputsArea" class="base-inputs-container" style="display:none;">
         <div style="font-size:0.68rem; font-weight:bold; color:#4a5568; margin-bottom:6px;">自キャラの基礎ステータスを入力（攻撃/防御/素早さ/HP/SP/Crt）</div>
         <div id="statInputRows"></div>
@@ -492,6 +492,9 @@
     <script>
       const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwbcXTp6lh0QynoRF2B2dpTWpEGcpcK4W2WXaf9EzW0oEGAS8WW8jDG0MFwhQcKOo1x3g/exec";
 
+      const ALL_TRIBES = ['神族', '魔神', '魔族', '異端', '聖人', '飛天', '魔獣', '聖獣', '精霊', '鬼族'];
+      const ALL_ELEMS = ['火', '水', '雷', '風', '光', '闇', '無'];
+
       let masterData = [];
       let party = [null, null, null, null, null];
       let baseStats = [
@@ -502,8 +505,17 @@
         { atk: 0, def: 0, spd: 0, hp: 0, sp: 0, crt: 0 }
       ];
 
-      let filterMode = 'chara'; // 'chara' または 'passive'
-      let currentView = 'percent'; // 'percent', 'compare', 'statCalc'
+      let filterMode = 'chara';
+      let currentView = 'percent';
+
+      // 文字列から％や＋を取り除いて正確な数値に変換する関数
+      function parseNum(val) {
+        if (val === null || val === undefined) return 0;
+        if (typeof val === 'number') return isNaN(val) ? 0 : val;
+        const str = String(val).replace(/[^0-9.-]/g, '');
+        const num = parseFloat(str);
+        return isNaN(num) ? 0 : num;
+      }
 
       window.onload = function() {
         fetch(GAS_API_URL)
@@ -518,7 +530,6 @@
           });
       };
 
-      // 絞り込みモード切替
       function setFilterMode(mode) {
         filterMode = mode;
         document.getElementById('modeCharaBtn').className = `switch-btn ${mode === 'chara' ? 'active' : ''}`;
@@ -526,7 +537,6 @@
         updateAllSelects();
       }
 
-      // 表示タブ切替
       function setViewMode(mode) {
         currentView = mode;
         document.getElementById('tabPercent').className = `view-tab ${mode === 'percent' ? 'active' : ''}`;
@@ -538,7 +548,53 @@
         recalculatePassives();
       }
 
-      // 絞り込み・ソート済みリスト生成
+      // パッシブ対象での絞り込み判定
+      function matchPassiveRange(item, selectedTribe, selectedElem) {
+        const range = item.range || '';
+
+        // 1. 種族判定
+        let matchTribe = true;
+        if (selectedTribe !== 'すべて') {
+          const mentionedTribes = ALL_TRIBES.filter(tr => range.includes(tr));
+          if (mentionedTribes.length > 0) {
+            matchTribe = range.includes(selectedTribe);
+          } else {
+            matchTribe = true; // 種族指定が文章中に一切なければ全種族OK
+          }
+        }
+
+        // 2. 属性判定
+        let matchElem = true;
+        if (selectedElem !== 'すべて') {
+          const cleanElem = selectedElem.replace('属性', '');
+          const mentionedElems = ALL_ELEMS.filter(el => range.includes(el));
+          if (mentionedElems.length > 0) {
+            matchElem = range.includes(cleanElem);
+          } else {
+            matchElem = true; // 属性指定が文章中に一切なければ全属性OK
+          }
+        }
+
+        return matchTribe && matchElem;
+      }
+
+      // キャラ自身での絞り込み判定
+      function matchCharaOwn(item, selectedTribe, selectedElem) {
+        let matchTribe = true;
+        if (selectedTribe !== 'すべて') {
+          matchTribe = item.tribe && item.tribe.includes(selectedTribe);
+        }
+
+        let matchElem = true;
+        if (selectedElem !== 'すべて') {
+          const cleanElem = selectedElem.replace('属性', '');
+          matchElem = item.element && item.element.includes(cleanElem);
+        }
+
+        return matchTribe && matchElem;
+      }
+
+      // 絞り込み・ソート実行
       function getFilteredList() {
         const tVal = document.getElementById('tribeFilter').value;
         const eVal = document.getElementById('elementFilter').value;
@@ -546,24 +602,18 @@
 
         let list = masterData.filter(item => {
           if (filterMode === 'chara') {
-            const matchTribe = (tVal === 'すべて') || (item.tribe && item.tribe.includes(tVal));
-            const matchElem = (eVal === 'すべて') || (item.element && item.element.includes(eVal.replace('属性','')));
-            return matchTribe && matchElem;
+            return matchCharaOwn(item, tVal, eVal);
           } else {
-            // パッシブ対象（バフ付与範囲）で絞り込み
-            const range = item.range || '';
-            const matchTribe = (tVal === 'すべて') || range.includes(tVal) || range.includes('全体');
-            const cleanElem = eVal.replace('属性','');
-            const matchElem = (eVal === 'すべて') || range.includes(cleanElem) || range.includes('全体');
-            return matchTribe && matchElem;
+            return matchPassiveRange(item, tVal, eVal);
           }
         });
 
-        if (sVal === 'atk_desc') list.sort((a,b) => (b.atk||0) - (a.atk||0));
-        else if (sVal === 'atk_asc') list.sort((a,b) => (a.atk||0) - (b.atk||0));
-        else if (sVal === 'spd_desc') list.sort((a,b) => (b.spd||0) - (a.spd||0));
-        else if (sVal === 'spd_asc') list.sort((a,b) => (a.spd||0) - (b.spd||0));
-        else if (sVal === 'crt_desc') list.sort((a,b) => (b.crt||0) - (a.crt||0));
+        // 正確な数値化（parseNum）による並び替え
+        if (sVal === 'atk_desc') list.sort((a,b) => parseNum(b.atk) - parseNum(a.atk));
+        else if (sVal === 'atk_asc') list.sort((a,b) => parseNum(a.atk) - parseNum(b.atk));
+        else if (sVal === 'spd_desc') list.sort((a,b) => parseNum(b.spd) - parseNum(a.spd));
+        else if (sVal === 'spd_asc') list.sort((a,b) => parseNum(a.spd) - parseNum(b.spd));
+        else if (sVal === 'crt_desc') list.sort((a,b) => parseNum(b.crt) - parseNum(a.crt));
         else if (sVal === 'name_asc') list.sort((a,b) => (a.name||'').localeCompare(b.name||'', 'ja'));
 
         return list;
@@ -627,26 +677,22 @@
         }
       }
 
-      // パッシブ適用判定
+      // パッシブ適用判定（giverのバフがreceiverにかかるか）
       function isApplicable(giver, receiver) {
         if (!giver || !receiver) return false;
         const range = giver.range || '';
 
-        const elements = ['火', '水', '雷', '風', '光', '闇', '無'];
-        const tribes = ['神族', '魔神', '魔族', '異端', '聖人', '飛天', '魔獣', '聖獣', '精霊', '鬼族'];
+        const mentionedElems = ALL_ELEMS.filter(el => range.includes(el));
+        const mentionedTribes = ALL_TRIBES.filter(tr => range.includes(tr));
 
-        const matchedElems = elements.filter(el => range.includes(el));
-        const matchedTribes = tribes.filter(tr => range.includes(tr));
+        if (mentionedElems.length === 0 && mentionedTribes.length === 0) return true;
 
-        if (matchedElems.length === 0 && matchedTribes.length === 0) return true;
+        const elemMatch = (mentionedElems.length === 0) || mentionedElems.some(el => (receiver.element || '').includes(el));
+        const tribeMatch = (mentionedTribes.length === 0) || mentionedTribes.some(tr => (receiver.tribe || '').includes(tr));
 
-        const elemMatch = matchedElems.some(el => (receiver.element || '').includes(el));
-        const tribeMatch = matchedTribes.some(tr => (receiver.tribe || '').includes(tr));
-
-        return elemMatch || tribeMatch;
+        return elemMatch && tribeMatch;
       }
 
-      // パッシブ計算実行
       function recalculatePassives() {
         const activeMembers = [];
         for (let i = 0; i < 5; i++) {
@@ -655,7 +701,6 @@
           }
         }
 
-        // スロットATK初期化
         for (let i = 0; i < 5; i++) {
           document.getElementById(`slotAtk_${i}`).textContent = "ATK: +0%";
         }
@@ -665,17 +710,16 @@
           return;
         }
 
-        // 各キャラのパッシブ合算
         const results = activeMembers.map(mem => {
           let atk = 0, def = 0, spd = 0, hp = 0, sp = 0, crt = 0;
           activeMembers.forEach(other => {
             if (isApplicable(other.chara, mem.chara)) {
-              atk += other.chara.atk || 0;
-              def += other.chara.def || 0;
-              spd += other.chara.spd || 0;
-              hp += other.chara.hp || 0;
-              sp += other.chara.sp || 0;
-              crt += other.chara.crt || 0;
+              atk += parseNum(other.chara.atk);
+              def += parseNum(other.chara.def);
+              spd += parseNum(other.chara.spd);
+              hp += parseNum(other.chara.hp);
+              sp += parseNum(other.chara.sp);
+              crt += parseNum(other.chara.crt);
             }
           });
           document.getElementById(`slotAtk_${mem.slot}`).textContent = `ATK: +${atk}%`;
@@ -691,7 +735,6 @@
         }
       }
 
-      // 1. 補正率 (%) テーブル（アイコン表示）
       function renderPercentTable(results) {
         let html = `
           <table class="result-table">
@@ -725,7 +768,6 @@
         document.getElementById('tableContainer').innerHTML = html;
       }
 
-      // 2. 保存PTとの見比べテーブル
       function renderCompareTable(currentResults) {
         const savedDataStr = localStorage.getItem('gvg_saved_party');
         if (!savedDataStr) {
@@ -734,7 +776,6 @@
         }
 
         const savedParty = JSON.parse(savedDataStr);
-        // 保存PTのパッシブを仮想計算
         const savedActive = [];
         savedParty.forEach((cIdx, sIdx) => {
           if (cIdx !== null && masterData[cIdx]) {
@@ -746,12 +787,12 @@
           let atk = 0, def = 0, spd = 0, hp = 0, sp = 0, crt = 0;
           savedActive.forEach(other => {
             if (isApplicable(other.chara, mem.chara)) {
-              atk += other.chara.atk || 0;
-              def += other.chara.def || 0;
-              spd += other.chara.spd || 0;
-              hp += other.chara.hp || 0;
-              sp += other.chara.sp || 0;
-              crt += other.chara.crt || 0;
+              atk += parseNum(other.chara.atk);
+              def += parseNum(other.chara.def);
+              spd += parseNum(other.chara.spd);
+              hp += parseNum(other.chara.hp);
+              sp += parseNum(other.chara.sp);
+              crt += parseNum(other.chara.crt);
             }
           });
           return { ...mem, stats: { atk, def, spd, hp, sp, crt } };
@@ -774,7 +815,6 @@
         `;
 
         currentResults.forEach(res => {
-          // 同スロットの保存PT補正と比較
           const savedMatch = savedResults.find(s => s.slot === res.slot);
           const sStats = savedMatch ? savedMatch.stats : { atk: 0, def: 0, spd: 0, hp: 0, sp: 0, crt: 0 };
 
@@ -803,7 +843,6 @@
         document.getElementById('tableContainer').innerHTML = html;
       }
 
-      // 3. 実数値入力フォーム描画
       function renderStatInputRows() {
         const container = document.getElementById('statInputRows');
         container.innerHTML = '';
@@ -834,7 +873,6 @@
         recalculatePassives();
       }
 
-      // 4. 実数値計算後テーブル
       function renderStatCalcTable(results) {
         let html = `
           <table class="result-table">
@@ -876,7 +914,6 @@
         document.getElementById('tableContainer').innerHTML = html;
       }
 
-      // パーティ保存
       function saveCurrentParty() {
         if (!party.some(p => p !== null)) return alert('保存するキャラが選択されていません！');
         localStorage.setItem('gvg_saved_party', JSON.stringify(party));
@@ -884,7 +921,6 @@
         alert('現在のパーティを保存しました！');
       }
 
-      // パーティ読込
       function loadSavedParty() {
         const savedData = localStorage.getItem('gvg_saved_party');
         if (!savedData) return alert('保存されたパーティが見つかりません。');
@@ -902,7 +938,6 @@
         alert('保存されたパーティを読み込みました！');
       }
 
-      // 選択クリア
       function clearParty() {
         party = [null, null, null, null, null];
         for (let i = 0; i < 5; i++) {
@@ -913,7 +948,6 @@
         recalculatePassives();
       }
 
-      // モーダル
       function openModal(slotIdx) {
         const charaIdx = party[slotIdx];
         if (charaIdx === null || !masterData[charaIdx]) return;
