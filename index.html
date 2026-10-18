@@ -6,119 +6,247 @@
     <style>
       * { box-sizing: border-box; }
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        background-color: #f0f2f5;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+        background-color: #f7fafc;
         margin: 0;
-        padding: 12px;
-        color: #1a202c;
+        padding: 10px 8px;
+        color: #2d3748;
       }
       .container {
-        max-width: 600px;
+        max-width: 460px;
         margin: 0 auto;
         background: #ffffff;
         border-radius: 12px;
-        padding: 16px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        padding: 14px 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
       }
-      h2 {
-        margin-top: 0;
+      h2.title {
         text-align: center;
-        color: #2b6cb0;
-        border-bottom: 2px solid #bee3f8;
-        padding-bottom: 8px;
-      }
-      .status-msg {
-        text-align: center;
-        font-size: 0.85rem;
-        color: #38a169;
-        margin-bottom: 12px;
-        background: #f0fff4;
-        padding: 6px;
-        border-radius: 6px;
-        border: 1px solid #c6f6d5;
-      }
-      .form-group {
-        margin-bottom: 12px;
-      }
-      label {
-        display: block;
-        font-size: 0.85rem;
+        font-size: 1.15rem;
         font-weight: bold;
-        color: #4a5568;
-        margin-bottom: 4px;
+        color: #2d3748;
+        margin: 2px 0 14px 0;
+        letter-spacing: 0.5px;
       }
-      select, input[type="text"] {
-        width: 100%;
-        padding: 8px 10px;
-        font-size: 0.95rem;
+
+      /* 絞り込みバー */
+      .filter-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1.25fr;
+        gap: 6px;
+        margin-bottom: 12px;
+        background: #f8fafc;
+        padding: 8px 6px;
+        border-radius: 8px;
+        border: 1px solid #edf2f7;
+      }
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+      }
+      .filter-group label {
+        font-size: 0.68rem;
+        color: #718096;
+        margin-bottom: 3px;
+        text-align: center;
+      }
+      .filter-group select {
+        font-size: 0.72rem;
+        padding: 4px 2px;
         border-radius: 6px;
         border: 1px solid #cbd5e0;
         background: #fff;
-      }
-      .chara-card {
-        background: #f7fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 12px;
-        margin-top: 12px;
-      }
-      .chara-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 10px;
-      }
-      .chara-icon {
-        width: 56px;
-        height: 56px;
-        border-radius: 8px;
-        object-fit: cover;
-        background: #edf2f7;
-      }
-      .chara-info h3 {
-        margin: 0;
-        font-size: 1.05rem;
+        height: 28px;
         color: #2d3748;
       }
-      .chara-sub {
-        font-size: 0.75rem;
-        color: #718096;
-        margin-top: 2px;
-      }
-      .stat-grid {
+
+      /* 5人スロット */
+      .slot-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 6px;
-        font-size: 0.8rem;
-        background: #fff;
-        padding: 8px;
-        border-radius: 6px;
-        border: 1px solid #edf2f7;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 4px;
+        margin-bottom: 14px;
       }
-      .stat-item {
+      .slot-card {
+        border: 1px dashed #cbd5e0;
+        border-radius: 6px;
+        padding: 6px 2px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: #fff;
+      }
+      .slot-icon-wrapper {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        overflow: hidden;
+        background: #edf2f7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: 1px solid #e2e8f0;
+      }
+      .slot-icon {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .slot-no-icon {
+        font-size: 0.62rem;
+        color: #a0aec0;
+      }
+      .slot-atk {
+        font-size: 0.65rem;
+        font-weight: bold;
+        color: #3182ce;
+        margin: 4px 0 2px 0;
+      }
+      .slot-select {
+        width: 100%;
+        font-size: 0.65rem;
+        padding: 3px 1px;
+        border: 1px dashed #cbd5e0;
+        border-radius: 4px;
+        background: #fff;
+        text-align: center;
+        color: #4a5568;
+      }
+
+      /* 下部テーブル */
+      .result-title {
+        text-align: center;
+        font-size: 0.85rem;
+        font-weight: bold;
+        color: #3182ce;
+        margin: 12px 0 8px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+      }
+      table.result-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.72rem;
         text-align: center;
       }
-      .stat-item span {
-        display: block;
+      table.result-table th {
+        background: #3182ce;
+        color: #fff;
+        padding: 6px 2px;
+        font-weight: normal;
+        border: 1px solid #2b6cb0;
+      }
+      table.result-table td {
+        padding: 6px 2px;
+        border: 1px solid #e2e8f0;
+        font-weight: bold;
+      }
+      td.chara-name-cell {
+        text-align: left;
+        padding-left: 6px;
+        color: #2d3748;
+        font-weight: normal;
+        line-height: 1.25;
+      }
+      td.val-cell {
+        color: #e53e3e;
+      }
+      .empty-msg {
+        text-align: center;
+        color: #a0aec0;
+        padding: 16px;
+        font-size: 0.78rem;
+        border: 1px solid #edf2f7;
+        border-radius: 6px;
+      }
+
+      /* 詳細モーダル */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.55);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+      .modal-content {
+        background: #ffffff;
+        padding: 16px 14px;
+        border-radius: 12px;
+        width: 88%;
+        max-width: 320px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+        text-align: center;
+      }
+      .modal-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 6px;
+        border: 1px solid #edf2f7;
+      }
+      .modal-name {
+        font-size: 0.98rem;
+        font-weight: bold;
+        margin: 0;
+        color: #2d3748;
+      }
+      .modal-sub {
+        font-size: 0.72rem;
         color: #718096;
+        margin: 4px 0 10px 0;
+      }
+      .modal-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        row-gap: 5px;
+        column-gap: 12px;
+        font-size: 0.76rem;
+        text-align: left;
+        background: #f8fafc;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        border: 1px solid #edf2f7;
+      }
+      .modal-range {
         font-size: 0.7rem;
+        color: #4a5568;
+        text-align: left;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        padding: 6px 8px;
+        border-radius: 6px;
+        margin-bottom: 12px;
+        line-height: 1.35;
       }
-      .stat-item strong {
-        color: #2b6cb0;
-        font-size: 0.95rem;
+      .modal-close-btn {
+        background: #3182ce;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 6px 24px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        font-weight: bold;
       }
-      
-      /* 広告エリア */
+
+      /* 最下部広告枠 */
       .ad-footer {
         margin-top: 24px;
         text-align: center;
-        padding: 10px 0;
-        background-color: #ffffff;
-        border-top: 1px solid #e2e8f0;
-        border-radius: 8px;
+        padding: 8px 0;
+        border-top: 1px solid #edf2f7;
       }
       .ad-label {
-        font-size: 10px;
+        font-size: 9px;
         color: #a0aec0;
         margin-bottom: 4px;
       }
@@ -126,47 +254,106 @@
   </head>
   <body>
     <div class="container">
-      <h2>📊 パッシブ計算ツール</h2>
-      
-      <div id="status" class="status-msg">マスタデータを読み込み中...</div>
+      <h2 class="title">パーティ パッシブ判定計算</h2>
 
-      <div id="app" style="display:none;">
-        <div class="form-group">
-          <label for="searchInp">🔍 キャラ検索 / 絞り込み</label>
-          <input type="text" id="searchInp" placeholder="キャラ名、属性、種族で検索..." oninput="filterCharas()">
-        </div>
-
-        <div class="form-group">
-          <label for="charaSelect">👤 キャラクターを選択</label>
-          <select id="charaSelect" onchange="onSelectChara()">
-            <option value="">-- キャラを選択してください --</option>
+      <!-- 絞り込みバー -->
+      <div class="filter-row">
+        <div class="filter-group">
+          <label>種族絞り込み</label>
+          <select id="tribeFilter" onchange="onFilterChange()">
+            <option value="すべて">すべて</option>
+            <option value="神族">神族</option>
+            <option value="魔神">魔神</option>
+            <option value="魔族">魔族</option>
+            <option value="異端">異端</option>
+            <option value="聖人">聖人</option>
+            <option value="飛天">飛天</option>
+            <option value="魔獣">魔獣</option>
+            <option value="聖獣">聖獣</option>
+            <option value="精霊">精霊</option>
+            <option value="鬼族">鬼族</option>
           </select>
         </div>
-
-        <div id="charaDetail" class="chara-card" style="display:none;">
-          <div class="chara-header">
-            <img id="cIcon" class="chara-icon" src="" alt="icon" onerror="this.src='https://via.placeholder.com/56?text=NoImage'">
-            <div class="chara-info">
-              <h3 id="cName">-</h3>
-              <div id="cSub" class="chara-sub">-</div>
-            </div>
-          </div>
-          <div class="stat-grid">
-            <div class="stat-item"><span>ATK</span><strong id="sAtk">0</strong></div>
-            <div class="stat-item"><span>DEF</span><strong id="sDef">0</strong></div>
-            <div class="stat-item"><span>SPD</span><strong id="sSpd">0</strong></div>
-            <div class="stat-item"><span>HP</span><strong id="sHp">0</strong></div>
-            <div class="stat-item"><span>SP</span><strong id="sSp">0</strong></div>
-            <div class="stat-item"><span>CRT</span><strong id="sCrt">0</strong></div>
-          </div>
+        <div class="filter-group">
+          <label>属性絞り込み</label>
+          <select id="elementFilter" onchange="onFilterChange()">
+            <option value="すべて">すべて</option>
+            <option value="闇属性">闇属性</option>
+            <option value="無属性">無属性</option>
+            <option value="光属性">光属性</option>
+            <option value="風属性">風属性</option>
+            <option value="火属性">火属性</option>
+            <option value="水属性">水属性</option>
+            <option value="雷属性">雷属性</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>並び替え</label>
+          <select id="sortFilter" onchange="onFilterChange()">
+            <option value="default">標準 (登録順)</option>
+            <option value="atk_desc">攻撃 (高い順)</option>
+            <option value="atk_asc">攻撃 (低い順)</option>
+            <option value="spd_desc">素早さ (高い順)</option>
+            <option value="spd_asc">素早さ (低い順)</option>
+            <option value="crt_desc">Crt (高い順)</option>
+            <option value="name_asc">名前 (五十音順)</option>
+          </select>
         </div>
       </div>
 
+      <!-- 5人スロット -->
+      <div class="slot-grid">
+        <!-- スロット1〜5 -->
+        <script>
+          for (let i = 0; i < 5; i++) {
+            document.write(`
+              <div class="slot-card" id="slotCard_${i}">
+                <div class="slot-icon-wrapper" onclick="openModal(${i})">
+                  <div id="slotIconBox_${i}" class="slot-no-icon">未選択</div>
+                </div>
+                <div class="slot-atk" id="slotAtk_${i}">ATK: +0%</div>
+                <select class="slot-select" id="slotSelect_${i}" onchange="onSlotChange(${i})">
+                  <option value="">--選${i+1}--</option>
+                </select>
+              </div>
+            `);
+          }
+        </script>
+      </div>
+
+      <!-- 適用後パッシブ補正一覧テーブル -->
+      <div class="result-section">
+        <div class="result-title">⚡ 各キャラの適用後パッシブ補正一覧</div>
+        <div id="tableContainer">
+          <div class="empty-msg">キャラを選択してください</div>
+        </div>
+      </div>
+
+      <!-- 広告枠 -->
       <div class="ad-footer">
         <div class="ad-label">スポンサーリンク</div>
-        <div id="ad-banner">
-          <div style="font-size:12px; color:#cbd5e0; padding:8px; border:1px dashed #e2e8f0;">広告枠 (320×50px)</div>
+        <div style="font-size:11px; color:#cbd5e0; padding:6px; border:1px dashed #e2e8f0; border-radius:4px;">広告枠 (320×50px)</div>
+      </div>
+    </div>
+
+    <!-- 詳細モーダル -->
+    <div id="detailModal" class="modal-overlay" onclick="closeModal()">
+      <div class="modal-content" onclick="event.stopPropagation()">
+        <img id="mIcon" class="modal-icon" src="" onerror="this.src='https://via.placeholder.com/60?text=NoImage'">
+        <h3 id="mName" class="modal-name">-</h3>
+        <div id="mSub" class="modal-sub">[種族] / [属性]</div>
+        <div class="modal-stats">
+          <div>攻撃: <span id="mAtk">0%</span></div>
+          <div>防御: <span id="mDef">0%</span></div>
+          <div>素早さ: <span id="mSpd">0%</span></div>
+          <div>HP: <span id="mHp">0%</span></div>
+          <div>SP: <span id="mSp">0%</span></div>
+          <div>Crt: <span id="mCrt">0%</span></div>
         </div>
+        <div class="modal-range">
+          <strong>対象範囲:</strong> <span id="mRange">-</span>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal()">閉じる</button>
       </div>
     </div>
 
@@ -174,78 +361,220 @@
       const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwbcXTp6lh0QynoRF2B2dpTWpEGcpcK4W2WXaf9EzW0oEGAS8WW8jDG0MFwhQcKOo1x3g/exec";
 
       let masterData = [];
+      let party = [null, null, null, null, null]; // 5人スロットに選ばれたキャラのインデックス
 
       window.onload = function() {
         fetch(GAS_API_URL)
-          .then(res => {
-            if (!res.ok) throw new Error("ネットワークエラー");
-            return res.json();
-          })
+          .then(res => res.json())
           .then(data => {
-            masterData = data;
-            document.getElementById('status').textContent = `✅ マスタデータ読み込み完了 (${data.length}体)`;
-            document.getElementById('app').style.display = 'block';
-            populateSelect(masterData);
+            // masterDataにインデックスを付与
+            masterData = data.map((item, idx) => ({ ...item, originalIdx: idx }));
+            updateAllSelects();
           })
           .catch(err => {
             console.error(err);
-            document.getElementById('status').style.color = '#e53e3e';
-            document.getElementById('status').style.background = '#fff5f5';
-            document.getElementById('status').textContent = '⚠️ データ取得に失敗しました。';
+            alert("データの取得に失敗しました。");
           });
       };
 
-      function populateSelect(list) {
-        const sel = document.getElementById('charaSelect');
-        sel.innerHTML = '<option value="">-- キャラを選択してください --</option>';
-        list.forEach((item, index) => {
-          const opt = document.createElement('option');
-          opt.value = index;
-          opt.textContent = `[${item.element || '不明'}] ${item.name} (${item.tribe || '不明'})`;
-          sel.appendChild(opt);
+      // フィルター＆ソート済みリストの取得
+      function getFilteredList() {
+        const tVal = document.getElementById('tribeFilter').value;
+        const eVal = document.getElementById('elementFilter').value;
+        const sVal = document.getElementById('sortFilter').value;
+
+        let list = masterData.filter(item => {
+          const matchTribe = (tVal === 'すべて') || (item.tribe && item.tribe.includes(tVal));
+          const matchElem = (eVal === 'すべて') || (item.element && item.element.includes(eVal.replace('属性','')));
+          return matchTribe && matchElem;
         });
+
+        if (sVal === 'atk_desc') list.sort((a,b) => (b.atk||0) - (a.atk||0));
+        else if (sVal === 'atk_asc') list.sort((a,b) => (a.atk||0) - (b.atk||0));
+        else if (sVal === 'spd_desc') list.sort((a,b) => (b.spd||0) - (a.spd||0));
+        else if (sVal === 'spd_asc') list.sort((a,b) => (a.spd||0) - (b.spd||0));
+        else if (sVal === 'crt_desc') list.sort((a,b) => (b.crt||0) - (a.crt||0));
+        else if (sVal === 'name_asc') list.sort((a,b) => (a.name||'').localeCompare(b.name||'', 'ja'));
+
+        return list;
       }
 
-      function filterCharas() {
-        const query = document.getElementById('searchInp').value.toLowerCase().trim();
-        if (!query) {
-          populateSelect(masterData);
-          return;
+      function onFilterChange() {
+        updateAllSelects();
+      }
+
+      // 5つのセレクトボックスの選択肢を更新
+      function updateAllSelects() {
+        const filtered = getFilteredList();
+
+        for (let i = 0; i < 5; i++) {
+          const sel = document.getElementById(`slotSelect_${i}`);
+          const currentVal = party[i];
+
+          sel.innerHTML = `<option value="">--選${i+1}--</option>`;
+
+          filtered.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.originalIdx;
+
+            const isCurrent = (currentVal === item.originalIdx);
+            const isUsedElsewhere = party.some((pIdx, sIdx) => sIdx !== i && pIdx === item.originalIdx);
+
+            if (isUsedElsewhere) {
+              opt.textContent = `${item.name} (選択中)`;
+              opt.disabled = true;
+            } else {
+              opt.textContent = item.name;
+            }
+
+            if (isCurrent) opt.selected = true;
+            sel.appendChild(opt);
+          });
         }
-        const filtered = masterData.filter(c => 
-          (c.name && c.name.toLowerCase().includes(query)) ||
-          (c.element && c.element.toLowerCase().includes(query)) ||
-          (c.tribe && c.tribe.toLowerCase().includes(query))
-        );
-        populateSelect(filtered);
       }
 
-      function onSelectChara() {
-        const sel = document.getElementById('charaSelect');
+      // スロットのキャラ選択変更時
+      function onSlotChange(slotIdx) {
+        const sel = document.getElementById(`slotSelect_${slotIdx}`);
         const val = sel.value;
-        const detail = document.getElementById('charaDetail');
+        party[slotIdx] = (val === "") ? null : parseInt(val, 10);
 
-        if (val === "") {
-          detail.style.display = 'none';
+        updateSlotCardUI(slotIdx);
+        updateAllSelects(); // 他スロットの(選択中)状態を更新
+        recalculatePassives();
+      }
+
+      // スロットのカード見た目更新
+      function updateSlotCardUI(slotIdx) {
+        const charaIdx = party[slotIdx];
+        const iconBox = document.getElementById(`slotIconBox_${slotIdx}`);
+
+        if (charaIdx === null || !masterData[charaIdx]) {
+          iconBox.className = "slot-no-icon";
+          iconBox.innerHTML = "未選択";
+        } else {
+          const chara = masterData[charaIdx];
+          iconBox.className = "";
+          iconBox.innerHTML = `<img class="slot-icon" src="${chara.icon || 'https://via.placeholder.com/44?text=No'}" onerror="this.src='https://via.placeholder.com/44?text=No'">`;
+        }
+      }
+
+      // パッシブが味方に適用されるかどうかの判定ロジック
+      function isApplicable(giver, receiver) {
+        if (!giver || !receiver) return false;
+        const range = giver.range || '';
+
+        const elements = ['火', '水', '雷', '風', '光', '闇', '無'];
+        const tribes = ['神族', '魔神', '魔族', '異端', '聖人', '飛天', '魔獣', '聖獣', '精霊', '鬼族'];
+
+        const matchedElems = elements.filter(el => range.includes(el));
+        const matchedTribes = tribes.filter(tr => range.includes(tr));
+
+        // 範囲指定がない（全体対象）
+        if (matchedElems.length === 0 && matchedTribes.length === 0) return true;
+
+        const elemMatch = matchedElems.some(el => (receiver.element || '').includes(el));
+        const tribeMatch = matchedTribes.some(tr => (receiver.tribe || '').includes(tr));
+
+        return elemMatch || tribeMatch;
+      }
+
+      // パッシブ合算計算＆テーブル反映
+      function recalculatePassives() {
+        const activeMembers = [];
+        for (let i = 0; i < 5; i++) {
+          if (party[i] !== null && masterData[party[i]]) {
+            activeMembers.push({ slot: i, chara: masterData[party[i]] });
+          }
+        }
+
+        if (activeMembers.length === 0) {
+          for (let i = 0; i < 5; i++) {
+            document.getElementById(`slotAtk_${i}`).textContent = "ATK: +0%";
+          }
+          document.getElementById('tableContainer').innerHTML = '<div class="empty-msg">キャラを選択してください</div>';
           return;
         }
 
-        const selectedText = sel.options[sel.selectedIndex].text;
-        const chara = masterData.find(c => `[${c.element || '不明'}] ${c.name} (${c.tribe || '不明'})` === selectedText) || masterData[val];
+        let tableHtml = `
+          <table class="result-table">
+            <thead>
+              <tr>
+                <th style="width:28%;">キャラ名</th>
+                <th>攻撃</th>
+                <th>防御</th>
+                <th>素早さ</th>
+                <th>HP</th>
+                <th>SP</th>
+                <th>Crt</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
 
-        if (!chara) return;
+        // 5つのスロットのATK数値をリセット
+        for (let i = 0; i < 5; i++) {
+          document.getElementById(`slotAtk_${i}`).textContent = "ATK: +0%";
+        }
 
-        document.getElementById('cName').textContent = chara.name;
-        document.getElementById('cSub').textContent = `種族: ${chara.tribe || '-'} / 属性: ${chara.element || '-'} / 射程: ${chara.range || '全般'}`;
-        document.getElementById('cIcon').src = chara.icon || 'https://via.placeholder.com/56?text=NoImage';
-        document.getElementById('sAtk').textContent = chara.atk;
-        document.getElementById('sDef').textContent = chara.def;
-        document.getElementById('sSpd').textContent = chara.spd;
-        document.getElementById('sHp').textContent = chara.hp;
-        document.getElementById('sSp').textContent = chara.sp;
-        document.getElementById('sCrt').textContent = chara.crt;
+        // 各メンバーが味方全員（自身含む）から受けるパッシブを合算
+        activeMembers.forEach(mem => {
+          let atk = 0, def = 0, spd = 0, hp = 0, sp = 0, crt = 0;
 
-        detail.style.display = 'block';
+          activeMembers.forEach(other => {
+            if (isApplicable(other.chara, mem.chara)) {
+              atk += other.chara.atk || 0;
+              def += other.chara.def || 0;
+              spd += other.chara.spd || 0;
+              hp += other.chara.hp || 0;
+              sp += other.chara.sp || 0;
+              crt += other.chara.crt || 0;
+            }
+          });
+
+          // スロットカード上の表示更新
+          document.getElementById(`slotAtk_${mem.slot}`).textContent = `ATK: +${atk}%`;
+
+          // 一覧テーブル行追加
+          tableHtml += `
+            <tr>
+              <td class="chara-name-cell">${mem.chara.name}</td>
+              <td class="val-cell">+${atk}%</td>
+              <td class="val-cell">+${def}%</td>
+              <td class="val-cell">+${spd}%</td>
+              <td class="val-cell">+${hp}%</td>
+              <td class="val-cell">+${sp}%</td>
+              <td class="val-cell">+${crt}%</td>
+            </tr>
+          `;
+        });
+
+        tableHtml += `</tbody></table>`;
+        document.getElementById('tableContainer').innerHTML = tableHtml;
+      }
+
+      // 詳細ポップアップ
+      function openModal(slotIdx) {
+        const charaIdx = party[slotIdx];
+        if (charaIdx === null || !masterData[charaIdx]) return;
+
+        const chara = masterData[charaIdx];
+        document.getElementById('mIcon').src = chara.icon || 'https://via.placeholder.com/60?text=NoImage';
+        document.getElementById('mName').textContent = chara.name;
+        document.getElementById('mSub').textContent = `[${chara.tribe || '種族不明'}] / [${chara.element || '属性不明'}]`;
+        document.getElementById('mAtk').textContent = `${chara.atk || 0}%`;
+        document.getElementById('mDef').textContent = `${chara.def || 0}%`;
+        document.getElementById('mSpd').textContent = `${chara.spd || 0}%`;
+        document.getElementById('mHp').textContent = `${chara.hp || 0}%`;
+        document.getElementById('mSp').textContent = `${chara.sp || 0}%`;
+        document.getElementById('mCrt').textContent = `${chara.crt || 0}%`;
+        document.getElementById('mRange').textContent = chara.range || '全体';
+
+        document.getElementById('detailModal').style.display = 'flex';
+      }
+
+      function closeModal() {
+        document.getElementById('detailModal').style.display = 'none';
       }
     </script>
   </body>
