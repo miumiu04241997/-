@@ -4,6 +4,7 @@
     <base target="_top">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+      * { box-sizing: border-box; }
       body {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         background-color: #f0f2f5;
@@ -26,32 +27,92 @@
         border-bottom: 2px solid #bee3f8;
         padding-bottom: 8px;
       }
-      
-      /* モーダル表示スタイル */
-      .modal-overlay {
-        display: none;
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: rgba(0,0,0,0.6);
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-      }
-      .modal-content {
-        background: #ffffff;
-        padding: 16px;
-        border-radius: 12px;
-        width: 90%;
-        max-width: 400px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-      }
-
-      /* 画面最下部の広告スペースエリア */
-      .ad-footer {
-        margin-top: 30px;
+      .status-msg {
         text-align: center;
-        padding: 12px 0;
+        font-size: 0.85rem;
+        color: #38a169;
+        margin-bottom: 12px;
+        background: #f0fff4;
+        padding: 6px;
+        border-radius: 6px;
+        border: 1px solid #c6f6d5;
+      }
+      .form-group {
+        margin-bottom: 12px;
+      }
+      label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: bold;
+        color: #4a5568;
+        margin-bottom: 4px;
+      }
+      select, input[type="text"] {
+        width: 100%;
+        padding: 8px 10px;
+        font-size: 0.95rem;
+        border-radius: 6px;
+        border: 1px solid #cbd5e0;
+        background: #fff;
+      }
+      .chara-card {
+        background: #f7fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px;
+        margin-top: 12px;
+      }
+      .chara-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+      .chara-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 8px;
+        object-fit: cover;
+        background: #edf2f7;
+      }
+      .chara-info h3 {
+        margin: 0;
+        font-size: 1.05rem;
+        color: #2d3748;
+      }
+      .chara-sub {
+        font-size: 0.75rem;
+        color: #718096;
+        margin-top: 2px;
+      }
+      .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        font-size: 0.8rem;
+        background: #fff;
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid #edf2f7;
+      }
+      .stat-item {
+        text-align: center;
+      }
+      .stat-item span {
+        display: block;
+        color: #718096;
+        font-size: 0.7rem;
+      }
+      .stat-item strong {
+        color: #2b6cb0;
+        font-size: 0.95rem;
+      }
+      
+      /* 広告エリア */
+      .ad-footer {
+        margin-top: 24px;
+        text-align: center;
+        padding: 10px 0;
         background-color: #ffffff;
         border-top: 1px solid #e2e8f0;
         border-radius: 8px;
@@ -59,7 +120,7 @@
       .ad-label {
         font-size: 10px;
         color: #a0aec0;
-        margin-bottom: 6px;
+        margin-bottom: 4px;
       }
     </style>
   </head>
@@ -67,96 +128,124 @@
     <div class="container">
       <h2>📊 パッシブ計算ツール</h2>
       
-      <!-- 計算結果や操作用コンテンツエリア -->
-      <div id="app">
-        <p style="text-align:center; color:#718096;">マスタデータを読み込み中...</p>
+      <div id="status" class="status-msg">マスタデータを読み込み中...</div>
+
+      <div id="app" style="display:none;">
+        <div class="form-group">
+          <label for="searchInp">🔍 キャラ検索 / 絞り込み</label>
+          <input type="text" id="searchInp" placeholder="キャラ名、属性、種族で検索..." oninput="filterCharas()">
+        </div>
+
+        <div class="form-group">
+          <label for="charaSelect">👤 キャラクターを選択</label>
+          <select id="charaSelect" onchange="onSelectChara()">
+            <option value="">-- キャラを選択してください --</option>
+          </select>
+        </div>
+
+        <div id="charaDetail" class="chara-card" style="display:none;">
+          <div class="chara-header">
+            <img id="cIcon" class="chara-icon" src="" alt="icon" onerror="this.src='https://via.placeholder.com/56?text=NoImage'">
+            <div class="chara-info">
+              <h3 id="cName">-</h3>
+              <div id="cSub" class="chara-sub">-</div>
+            </div>
+          </div>
+          <div class="stat-grid">
+            <div class="stat-item"><span>ATK</span><strong id="sAtk">0</strong></div>
+            <div class="stat-item"><span>DEF</span><strong id="sDef">0</strong></div>
+            <div class="stat-item"><span>SPD</span><strong id="sSpd">0</strong></div>
+            <div class="stat-item"><span>HP</span><strong id="sHp">0</strong></div>
+            <div class="stat-item"><span>SP</span><strong id="sSp">0</strong></div>
+            <div class="stat-item"><span>CRT</span><strong id="sCrt">0</strong></div>
+          </div>
+        </div>
       </div>
 
-      <!-- 画面最下部の広告表示用フッターエリア（操作エリアと完全分離） -->
       <div class="ad-footer">
         <div class="ad-label">スポンサーリンク</div>
         <div id="ad-banner">
-          <!-- 広告審査通過後、ここにAdSenseやi-mobile等の配信タグを貼り付けます -->
-          <div style="font-size:12px; color:#cbd5e0; padding:10px; border:1px dashed #e2e8f0;">広告枠 (320×50px)</div>
+          <div style="font-size:12px; color:#cbd5e0; padding:8px; border:1px dashed #e2e8f0;">広告枠 (320×50px)</div>
         </div>
-      </div>
-    </div>
-
-    <!-- キャラ詳細用モーダル -->
-    <div id="charaModal" class="modal-overlay" onclick="closeModal('charaModal')">
-      <div class="modal-content" onclick="event.stopPropagation()">
-        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-          <img id="mIcon" src="https://via.placeholder.com/64?text=NoImage" style="width:64px; height:64px; border-radius:8px;">
-          <div>
-            <h3 id="mName" style="margin:0; font-size:1.1rem;">-</h3>
-            <div id="mSub" style="font-size:0.75rem; color:#718096;">-</div>
-          </div>
-        </div>
-        <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:6px; font-size:0.8rem; background:#f7fafc; padding:8px; border-radius:6px;">
-          <div>ATK: <strong id="mAtk">-</strong></div>
-          <div>DEF: <strong id="mDef">-</strong></div>
-          <div>SPD: <strong id="mSpd">-</strong></div>
-          <div>HP: <strong id="mHp">-</strong></div>
-          <div>SP: <strong id="mSp">-</strong></div>
-          <div>CRT: <strong id="mCrt">-</strong></div>
-          <div style="grid-column:span 2;">射程: <strong id="mRange">-</strong></div>
-        </div>
-        <button style="width:100%; margin-top:12px; padding:8px; background:#e2e8f0; border:none; border-radius:6px; font-weight:bold; cursor:pointer;" onclick="closeModal('charaModal')">閉じる</button>
       </div>
     </div>
 
     <script>
-      // 発行されたGASの「ウェブアプリURL」を以下に貼り付けます
       const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwbcXTp6lh0QynoRF2B2dpTWpEGcpcK4W2WXaf9EzW0oEGAS8WW8jDG0MFwhQcKOo1x3g/exec";
 
       let masterData = [];
 
-      // 画面読み込み時にAPI経由でマスタデータを取得
       window.onload = function() {
-        if (!GAS_API_URL || GAS_API_URL.includes("ここにコピーした")) {
-          document.getElementById('app').innerHTML = '<p style="color:#e53e3e; text-align:center;">GAS_API_URLが設定されていません。</p>';
-          return;
-        }
-
         fetch(GAS_API_URL)
-          .then(response => {
-            if (!response.ok) throw new Error("ネットワーク応答が正常ではありません");
-            return response.json();
+          .then(res => {
+            if (!res.ok) throw new Error("ネットワークエラー");
+            return res.json();
           })
           .then(data => {
             masterData = data;
-            initApp(masterData);
+            document.getElementById('status').textContent = `✅ マスタデータ読み込み完了 (${data.length}体)`;
+            document.getElementById('app').style.display = 'block';
+            populateSelect(masterData);
           })
-          .catch(error => {
-            console.error("データ取得エラー:", error);
-            document.getElementById('app').innerHTML = '<p style="color:#e53e3e; text-align:center;">マスタデータの読み込みに失敗しました。</p>';
+          .catch(err => {
+            console.error(err);
+            document.getElementById('status').style.color = '#e53e3e';
+            document.getElementById('status').style.background = '#fff5f5';
+            document.getElementById('status').textContent = '⚠️ データ取得に失敗しました。';
           });
       };
 
-      // アプリ初期化・画面構築関数
-      function initApp(data) {
-        const app = document.getElementById('app');
-        app.innerHTML = `<p style="text-align:center; color:#38a169;">✅ マスタデータ読み込み完了 (${data.length}体)</p>`;
-        // ここに既存のキャラ選択リスト生成や計算処理の呼び出しを記述します
+      function populateSelect(list) {
+        const sel = document.getElementById('charaSelect');
+        sel.innerHTML = '<option value="">-- キャラを選択してください --</option>';
+        list.forEach((item, index) => {
+          const opt = document.createElement('option');
+          opt.value = index;
+          opt.textContent = `[${item.element || '不明'}] ${item.name} (${item.tribe || '不明'})`;
+          sel.appendChild(opt);
+        });
       }
 
-      function showModal(chara) {
+      function filterCharas() {
+        const query = document.getElementById('searchInp').value.toLowerCase().trim();
+        if (!query) {
+          populateSelect(masterData);
+          return;
+        }
+        const filtered = masterData.filter(c => 
+          (c.name && c.name.toLowerCase().includes(query)) ||
+          (c.element && c.element.toLowerCase().includes(query)) ||
+          (c.tribe && c.tribe.toLowerCase().includes(query))
+        );
+        populateSelect(filtered);
+      }
+
+      function onSelectChara() {
+        const sel = document.getElementById('charaSelect');
+        const val = sel.value;
+        const detail = document.getElementById('charaDetail');
+
+        if (val === "") {
+          detail.style.display = 'none';
+          return;
+        }
+
+        const selectedText = sel.options[sel.selectedIndex].text;
+        const chara = masterData.find(c => `[${c.element || '不明'}] ${c.name} (${c.tribe || '不明'})` === selectedText) || masterData[val];
+
         if (!chara) return;
-        document.getElementById('mIcon').src = chara.icon || 'https://via.placeholder.com/64?text=NoImage';
-        document.getElementById('mName').textContent = chara.name;
-        document.getElementById('mSub').textContent = '[' + (chara.tribe || '種族不明') + '] / [' + (chara.element || '属性不明') + ']';
-        document.getElementById('mAtk').textContent = chara.atk;
-        document.getElementById('mDef').textContent = chara.def;
-        document.getElementById('mSpd').textContent = chara.spd;
-        document.getElementById('mHp').textContent = chara.hp;
-        document.getElementById('mSp').textContent = chara.sp;
-        document.getElementById('mCrt').textContent = chara.crt;
-        document.getElementById('mRange').textContent = chara.range || '全般';
-        document.getElementById('charaModal').style.display = 'flex';
-      }
 
-      function closeModal(modalId) {
-        document.getElementById(modalId).style.display = 'none';
+        document.getElementById('cName').textContent = chara.name;
+        document.getElementById('cSub').textContent = `種族: ${chara.tribe || '-'} / 属性: ${chara.element || '-'} / 射程: ${chara.range || '全般'}`;
+        document.getElementById('cIcon').src = chara.icon || 'https://via.placeholder.com/56?text=NoImage';
+        document.getElementById('sAtk').textContent = chara.atk;
+        document.getElementById('sDef').textContent = chara.def;
+        document.getElementById('sSpd').textContent = chara.spd;
+        document.getElementById('sHp').textContent = chara.hp;
+        document.getElementById('sSp').textContent = chara.sp;
+        document.getElementById('sCrt').textContent = chara.crt;
+
+        detail.style.display = 'block';
       }
     </script>
   </body>
