@@ -452,7 +452,7 @@
 
       <!-- 実数値入力アコーディオン -->
       <div id="baseStatInputsArea" class="base-inputs-container" style="display:none;">
-        <div style="font-size:0.68rem; font-weight:bold; color:#4a5568; margin-bottom:6px;">自キャラの基礎ステータスを入力（攻撃/防御/素早さ/HP/SP/Crt）</div>
+        <div style="font-size:0.68rem; font-weight:bold; color:#4a5568; margin-bottom:6px;">自キャラの基礎ステータスを入力（攻撃/HP/防御/素早さ/SP/Crt）</div>
         <div id="statInputRows"></div>
       </div>
 
@@ -476,9 +476,9 @@
         <div id="mSub" class="modal-sub">[種族] / [属性]</div>
         <div class="modal-stats">
           <div>攻撃: <span id="mAtk">0%</span></div>
+          <div>HP: <span id="mHp">0%</span></div>
           <div>防御: <span id="mDef">0%</span></div>
           <div>素早さ: <span id="mSpd">0%</span></div>
-          <div>HP: <span id="mHp">0%</span></div>
           <div>SP: <span id="mSp">0%</span></div>
           <div>Crt: <span id="mCrt">0%</span></div>
         </div>
@@ -498,17 +498,16 @@
       let masterData = [];
       let party = [null, null, null, null, null];
       let baseStats = [
-        { atk: 0, def: 0, spd: 0, hp: 0, sp: 0, crt: 0 },
-        { atk: 0, def: 0, spd: 0, hp: 0, sp: 0, crt: 0 },
-        { atk: 0, def: 0, spd: 0, hp: 0, sp: 0, crt: 0 },
-        { atk: 0, def: 0, spd: 0, hp: 0, sp: 0, crt: 0 },
-        { atk: 0, def: 0, spd: 0, hp: 0, sp: 0, crt: 0 }
+        { atk: 0, hp: 0, def: 0, spd: 0, sp: 0, crt: 0 },
+        { atk: 0, hp: 0, def: 0, spd: 0, sp: 0, crt: 0 },
+        { atk: 0, hp: 0, def: 0, spd: 0, sp: 0, crt: 0 },
+        { atk: 0, hp: 0, def: 0, spd: 0, sp: 0, crt: 0 },
+        { atk: 0, hp: 0, def: 0, spd: 0, sp: 0, crt: 0 }
       ];
 
       let filterMode = 'chara';
       let currentView = 'percent';
 
-      // 文字列から％や＋を取り除いて正確な数値に変換する関数
       function parseNum(val) {
         if (val === null || val === undefined) return 0;
         if (typeof val === 'number') return isNaN(val) ? 0 : val;
@@ -548,22 +547,19 @@
         recalculatePassives();
       }
 
-      // パッシブ対象での絞り込み判定
       function matchPassiveRange(item, selectedTribe, selectedElem) {
         const range = item.range || '';
 
-        // 1. 種族判定
         let matchTribe = true;
         if (selectedTribe !== 'すべて') {
           const mentionedTribes = ALL_TRIBES.filter(tr => range.includes(tr));
           if (mentionedTribes.length > 0) {
             matchTribe = range.includes(selectedTribe);
           } else {
-            matchTribe = true; // 種族指定が文章中に一切なければ全種族OK
+            matchTribe = true;
           }
         }
 
-        // 2. 属性判定
         let matchElem = true;
         if (selectedElem !== 'すべて') {
           const cleanElem = selectedElem.replace('属性', '');
@@ -571,14 +567,13 @@
           if (mentionedElems.length > 0) {
             matchElem = range.includes(cleanElem);
           } else {
-            matchElem = true; // 属性指定が文章中に一切なければ全属性OK
+            matchElem = true;
           }
         }
 
         return matchTribe && matchElem;
       }
 
-      // キャラ自身での絞り込み判定
       function matchCharaOwn(item, selectedTribe, selectedElem) {
         let matchTribe = true;
         if (selectedTribe !== 'すべて') {
@@ -594,7 +589,6 @@
         return matchTribe && matchElem;
       }
 
-      // 絞り込み・ソート実行
       function getFilteredList() {
         const tVal = document.getElementById('tribeFilter').value;
         const eVal = document.getElementById('elementFilter').value;
@@ -608,7 +602,6 @@
           }
         });
 
-        // 正確な数値化（parseNum）による並び替え
         if (sVal === 'atk_desc') list.sort((a,b) => parseNum(b.atk) - parseNum(a.atk));
         else if (sVal === 'atk_asc') list.sort((a,b) => parseNum(a.atk) - parseNum(b.atk));
         else if (sVal === 'spd_desc') list.sort((a,b) => parseNum(b.spd) - parseNum(a.spd));
@@ -677,7 +670,6 @@
         }
       }
 
-      // パッシブ適用判定（giverのバフがreceiverにかかるか）
       function isApplicable(giver, receiver) {
         if (!giver || !receiver) return false;
         const range = giver.range || '';
@@ -711,19 +703,19 @@
         }
 
         const results = activeMembers.map(mem => {
-          let atk = 0, def = 0, spd = 0, hp = 0, sp = 0, crt = 0;
+          let atk = 0, hp = 0, def = 0, spd = 0, sp = 0, crt = 0;
           activeMembers.forEach(other => {
             if (isApplicable(other.chara, mem.chara)) {
               atk += parseNum(other.chara.atk);
+              hp += parseNum(other.chara.hp);
               def += parseNum(other.chara.def);
               spd += parseNum(other.chara.spd);
-              hp += parseNum(other.chara.hp);
               sp += parseNum(other.chara.sp);
               crt += parseNum(other.chara.crt);
             }
           });
           document.getElementById(`slotAtk_${mem.slot}`).textContent = `ATK: +${atk}%`;
-          return { ...mem, stats: { atk, def, spd, hp, sp, crt } };
+          return { ...mem, stats: { atk, hp, def, spd, sp, crt } };
         });
 
         if (currentView === 'percent') {
@@ -735,6 +727,7 @@
         }
       }
 
+      /* 順序: 攻撃 -> HP -> 防御 -> 素早さ -> SP -> Crt */
       function renderPercentTable(results) {
         let html = `
           <table class="result-table">
@@ -742,9 +735,9 @@
               <tr>
                 <th style="width:38px;">キャラ</th>
                 <th>攻撃</th>
+                <th>HP</th>
                 <th>防御</th>
                 <th>素早さ</th>
-                <th>HP</th>
                 <th>SP</th>
                 <th>Crt</th>
               </tr>
@@ -756,9 +749,9 @@
             <tr>
               <td><img class="table-icon" src="${res.chara.icon || 'https://via.placeholder.com/32?text=No'}" onclick="openModal(${res.slot})" onerror="this.src='https://via.placeholder.com/32?text=No'"></td>
               <td class="val-cell">+${res.stats.atk}%</td>
+              <td class="val-cell">+${res.stats.hp}%</td>
               <td class="val-cell">+${res.stats.def}%</td>
               <td class="val-cell">+${res.stats.spd}%</td>
-              <td class="val-cell">+${res.stats.hp}%</td>
               <td class="val-cell">+${res.stats.sp}%</td>
               <td class="val-cell">+${res.stats.crt}%</td>
             </tr>
@@ -784,18 +777,18 @@
         });
 
         const savedResults = savedActive.map(mem => {
-          let atk = 0, def = 0, spd = 0, hp = 0, sp = 0, crt = 0;
+          let atk = 0, hp = 0, def = 0, spd = 0, sp = 0, crt = 0;
           savedActive.forEach(other => {
             if (isApplicable(other.chara, mem.chara)) {
               atk += parseNum(other.chara.atk);
+              hp += parseNum(other.chara.hp);
               def += parseNum(other.chara.def);
               spd += parseNum(other.chara.spd);
-              hp += parseNum(other.chara.hp);
               sp += parseNum(other.chara.sp);
               crt += parseNum(other.chara.crt);
             }
           });
-          return { ...mem, stats: { atk, def, spd, hp, sp, crt } };
+          return { ...mem, stats: { atk, hp, def, spd, sp, crt } };
         });
 
         let html = `
@@ -804,9 +797,9 @@
               <tr>
                 <th style="width:38px;">キャラ</th>
                 <th>攻撃</th>
+                <th>HP</th>
                 <th>防御</th>
                 <th>素早さ</th>
-                <th>HP</th>
                 <th>SP</th>
                 <th>Crt</th>
               </tr>
@@ -816,7 +809,7 @@
 
         currentResults.forEach(res => {
           const savedMatch = savedResults.find(s => s.slot === res.slot);
-          const sStats = savedMatch ? savedMatch.stats : { atk: 0, def: 0, spd: 0, hp: 0, sp: 0, crt: 0 };
+          const sStats = savedMatch ? savedMatch.stats : { atk: 0, hp: 0, def: 0, spd: 0, sp: 0, crt: 0 };
 
           function renderDiff(cur, sav) {
             const diff = cur - sav;
@@ -831,9 +824,9 @@
             <tr>
               <td><img class="table-icon" src="${res.chara.icon || 'https://via.placeholder.com/32?text=No'}" onclick="openModal(${res.slot})" onerror="this.src='https://via.placeholder.com/32?text=No'"></td>
               <td class="val-cell">${renderDiff(res.stats.atk, sStats.atk)}</td>
+              <td class="val-cell">${renderDiff(res.stats.hp, sStats.hp)}</td>
               <td class="val-cell">${renderDiff(res.stats.def, sStats.def)}</td>
               <td class="val-cell">${renderDiff(res.stats.spd, sStats.spd)}</td>
-              <td class="val-cell">${renderDiff(res.stats.hp, sStats.hp)}</td>
               <td class="val-cell">${renderDiff(res.stats.sp, sStats.sp)}</td>
               <td class="val-cell">${renderDiff(res.stats.crt, sStats.crt)}</td>
             </tr>
@@ -857,9 +850,9 @@
             <img class="base-input-thumb" src="${chara.icon || 'https://via.placeholder.com/28?text=No'}">
             <div class="base-stat-grid">
               <input type="number" class="base-stat-input" placeholder="攻" value="${baseStats[i].atk || ''}" oninput="updateBaseStat(${i}, 'atk', this.value)">
+              <input type="number" class="base-stat-input" placeholder="HP" value="${baseStats[i].hp || ''}" oninput="updateBaseStat(${i}, 'hp', this.value)">
               <input type="number" class="base-stat-input" placeholder="防" value="${baseStats[i].def || ''}" oninput="updateBaseStat(${i}, 'def', this.value)">
               <input type="number" class="base-stat-input" placeholder="早" value="${baseStats[i].spd || ''}" oninput="updateBaseStat(${i}, 'spd', this.value)">
-              <input type="number" class="base-stat-input" placeholder="HP" value="${baseStats[i].hp || ''}" oninput="updateBaseStat(${i}, 'hp', this.value)">
               <input type="number" class="base-stat-input" placeholder="SP" value="${baseStats[i].sp || ''}" oninput="updateBaseStat(${i}, 'sp', this.value)">
               <input type="number" class="base-stat-input" placeholder="Crt" value="${baseStats[i].crt || ''}" oninput="updateBaseStat(${i}, 'crt', this.value)">
             </div>
@@ -880,9 +873,9 @@
               <tr>
                 <th style="width:38px;">キャラ</th>
                 <th>攻撃</th>
+                <th>HP</th>
                 <th>防御</th>
                 <th>素早さ</th>
-                <th>HP</th>
                 <th>SP</th>
                 <th>Crt</th>
               </tr>
@@ -901,9 +894,9 @@
             <tr>
               <td><img class="table-icon" src="${res.chara.icon || 'https://via.placeholder.com/32?text=No'}" onclick="openModal(${res.slot})" onerror="this.src='https://via.placeholder.com/32?text=No'"></td>
               <td class="val-cell">${calcFinal(b.atk, res.stats.atk)}</td>
+              <td class="val-cell">${calcFinal(b.hp, res.stats.hp)}</td>
               <td class="val-cell">${calcFinal(b.def, res.stats.def)}</td>
               <td class="val-cell">${calcFinal(b.spd, res.stats.spd)}</td>
-              <td class="val-cell">${calcFinal(b.hp, res.stats.hp)}</td>
               <td class="val-cell">${calcFinal(b.sp, res.stats.sp)}</td>
               <td class="val-cell">${calcFinal(b.crt, res.stats.crt)}</td>
             </tr>
@@ -957,9 +950,9 @@
         document.getElementById('mName').textContent = chara.name;
         document.getElementById('mSub').textContent = `[${chara.tribe || '種族不明'}] / [${chara.element || '属性不明'}]`;
         document.getElementById('mAtk').textContent = `${chara.atk || 0}%`;
+        document.getElementById('mHp').textContent = `${chara.hp || 0}%`;
         document.getElementById('mDef').textContent = `${chara.def || 0}%`;
         document.getElementById('mSpd').textContent = `${chara.spd || 0}%`;
-        document.getElementById('mHp').textContent = `${chara.hp || 0}%`;
         document.getElementById('mSp').textContent = `${chara.sp || 0}%`;
         document.getElementById('mCrt').textContent = `${chara.crt || 0}%`;
         document.getElementById('mRange').textContent = chara.range || '全体';
