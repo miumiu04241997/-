@@ -492,6 +492,9 @@
     <script>
       const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwbcXTp6lh0QynoRF2B2dpTWpEGcpcK4W2WXaf9EzW0oEGAS8WW8jDG0MFwhQcKOo1x3g/exec";
 
+      const ALL_TRIBES = ['魔神', '神族', '魔族', '異端', '聖人', '飛天', '魔獣', '聖獣', '精霊', '鬼族'];
+      const ALL_ELEMS = ['火', '水', '雷', '風', '光', '闇', '無'];
+
       let masterData = [];
       let party = [null, null, null, null, null];
       let baseStats = [
@@ -544,15 +547,15 @@
         recalculatePassives();
       }
 
-      // 精密パッシブ適用判定（giverのパッシブがreceiverに適用されるか）
+      // 精密パッシブ適用判定（giverのバフがreceiverにかかるか）
       function isApplicable(giver, receiver) {
         if (!giver || !receiver) return false;
-        const range = giver.range || '';
+        const range = String(giver.range || '');
 
         // 1. 自分自身のみ対象
         const isSelfOnly = (range.includes('自身') || range.includes('自分')) && 
-                           !range.includes('同属性') && !range.includes('同種族') && 
-                           !range.includes('同じ') && !range.includes('味方') && !range.includes('全体');
+                           !range.includes('味方') && !range.includes('全体') && 
+                           !range.includes('同属性') && !range.includes('同種族') && !range.includes('同じ');
         if (isSelfOnly) {
           return giver.originalIdx === receiver.originalIdx;
         }
@@ -569,57 +572,67 @@
           if (gTribe && rTribe && gTribe !== rTribe) return false;
         }
 
-        // 3. 具体的な属性の検出と判定
+        // 3. 具体的な指定種族の判定（魔神と神族を厳密分離）
+        const targetTribes = [];
+        ALL_TRIBES.forEach(tr => {
+          if (range.includes(tr)) {
+            targetTribes.push(tr);
+          }
+        });
+        // 「神」単体表記の補完（「魔神」は除く）
+        if (!targetTribes.includes('神族') && !targetTribes.includes('魔神') && range.includes('神') && !range.includes('魔神')) {
+          targetTribes.push('神族');
+        }
+
+        if (targetTribes.length > 0) {
+          const rTribe = receiver.tribe || '';
+          const matchTribe = targetTribes.some(tr => rTribe.includes(tr) || rTribe.replace('族','') === tr.replace('族',''));
+          if (!matchTribe) return false;
+        }
+
+        // 4. 具体的な指定属性の判定
         const targetElems = [];
-        const elemList = ['火', '水', '雷', '風', '光', '闇', '無'];
-        elemList.forEach(el => {
-          if (range.includes(el)) targetElems.push(el);
+        ALL_ELEMS.forEach(el => {
+          if (range.includes(el)) {
+            if (el === '無' && !range.includes('無属性') && !range.includes('無・') && !range.includes('・無')) return;
+            targetElems.push(el);
+          }
         });
 
         if (targetElems.length > 0) {
           const rElem = receiver.element || '';
-          const match = targetElems.some(el => rElem.includes(el));
-          if (!match) return false;
-        }
-
-        // 4. 具体的な種族の検出と判定
-        const targetTribes = [];
-        const tribeList = [
-          { name: '神族', keys: ['神族', '神'] },
-          { name: '魔神', keys: ['魔神'] },
-          { name: '魔族', keys: ['魔族'] },
-          { name: '異端', keys: ['異端'] },
-          { name: '聖人', keys: ['聖人'] },
-          { name: '飛天', keys: ['飛天'] },
-          { name: '魔獣', keys: ['魔獣'] },
-          { name: '聖獣', keys: ['聖獣'] },
-          { name: '精霊', keys: ['精霊'] },
-          { name: '鬼族', keys: ['鬼族', '鬼'] }
-        ];
-
-        tribeList.forEach(t => {
-          if (t.keys.some(k => range.includes(k))) {
-            targetTribes.push(t.name);
-          }
-        });
-
-        if (targetTribes.length > 0) {
-          const rTribe = receiver.tribe || '';
-          const match = targetTribes.some(tr => rTribe.includes(tr.replace('族', '')));
-          if (!match) return false;
+          const matchElem = targetElems.some(el => rElem.includes(el));
+          if (!matchElem) return false;
         }
 
         return true;
       }
 
+      // 絞り込み検索（パッシブ対象）判定
       function matchPassiveRange(item, selectedTribe, selectedElem) {
+        const cleanTribe = selectedTribe === 'すべて' ? '' : selectedTribe;
+        const cleanElem = selectedElem === 'すべて' ? '' : selectedElem.replace('属性', '');
+
+        // 属性・種族両方が「すべて」の時は全パッシブキャラを対象
+        if (!cleanTribe && !cleanElem) return true;
+
         const dummyReceiver = {
-          element: selectedElem === 'すべて' ? '' : selectedElem,
-          tribe: selectedTribe === 'すべて' ? '' : selectedTribe,
-          originalIdx: -1
+          element: cleanElem || '全属性',
+          tribe: cleanTribe || '全種族',
+          originalIdx: -99
         };
-        const dummyGiver = { ...item, originalIdx: -2 };
-        return isApplicable(dummyGiver, dummyReceiver);
+
+        if (cleanTribe) {
+          const tribeOk = isApplicable(item, { element: '火水雷風光闇無', tribe: cleanTribe, originalIdx: -99 });
+          if (!tribeOk) return false;
+        }
+
+        if (cleanElem) {
+          const elemOk = isApplicable(item, { element: cleanElem, tribe: '全種族', originalIdx: -99 });
+          if (!elemOk) return false;
+        }
+
+        return true;
       }
 
       function matchCharaOwn(item, selectedTribe, selectedElem) {
