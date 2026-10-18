@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background-color: #f0f2f5;
+        margin: 0;
+        padding: 12px;
+        color: #1a202c;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      }
+      h2 {
+        margin-top: 0;
+        text-align: center;
+        color: #2b6cb0;
+        border-bottom: 2px solid #bee3f8;
+        padding-bottom: 8px;
+      }
+      
+      /* モーダル表示スタイル */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.6);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+      .modal-content {
+        background: #ffffff;
+        padding: 16px;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      }
+
+      /* 画面最下部の広告スペースエリア */
+      .ad-footer {
+        margin-top: 30px;
+        text-align: center;
+        padding: 12px 0;
+        background-color: #ffffff;
+        border-top: 1px solid #e2e8f0;
+        border-radius: 8px;
+      }
+      .ad-label {
+        font-size: 10px;
+        color: #a0aec0;
+        margin-bottom: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>📊 パッシブ計算ツール</h2>
+      
+      <!-- 計算結果や操作用コンテンツエリア -->
+      <div id="app">
+        <p style="text-align:center; color:#718096;">マスタデータを読み込み中...</p>
+      </div>
+
+      <!-- 画面最下部の広告表示用フッターエリア（操作エリアと完全分離） -->
+      <div class="ad-footer">
+        <div class="ad-label">スポンサーリンク</div>
+        <div id="ad-banner">
+          <!-- 広告審査通過後、ここにAdSenseやi-mobile等の配信タグを貼り付けます -->
+          <div style="font-size:12px; color:#cbd5e0; padding:10px; border:1px dashed #e2e8f0;">広告枠 (320×50px)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- キャラ詳細用モーダル -->
+    <div id="charaModal" class="modal-overlay" onclick="closeModal('charaModal')">
+      <div class="modal-content" onclick="event.stopPropagation()">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+          <img id="mIcon" src="https://via.placeholder.com/64?text=NoImage" style="width:64px; height:64px; border-radius:8px;">
+          <div>
+            <h3 id="mName" style="margin:0; font-size:1.1rem;">-</h3>
+            <div id="mSub" style="font-size:0.75rem; color:#718096;">-</div>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:6px; font-size:0.8rem; background:#f7fafc; padding:8px; border-radius:6px;">
+          <div>ATK: <strong id="mAtk">-</strong></div>
+          <div>DEF: <strong id="mDef">-</strong></div>
+          <div>SPD: <strong id="mSpd">-</strong></div>
+          <div>HP: <strong id="mHp">-</strong></div>
+          <div>SP: <strong id="mSp">-</strong></div>
+          <div>CRT: <strong id="mCrt">-</strong></div>
+          <div style="grid-column:span 2;">射程: <strong id="mRange">-</strong></div>
+        </div>
+        <button style="width:100%; margin-top:12px; padding:8px; background:#e2e8f0; border:none; border-radius:6px; font-weight:bold; cursor:pointer;" onclick="closeModal('charaModal')">閉じる</button>
+      </div>
+    </div>
+
+    <script>
+      // 発行されたGASの「ウェブアプリURL」を以下に貼り付けます
+      const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwbcXTp6lh0QynoRF2B2dpTWpEGcpcK4W2WXaf9EzW0oEGAS8WW8jDG0MFwhQcKOo1x3g/exec";
+
+      let masterData = [];
+
+      // 画面読み込み時にAPI経由でマスタデータを取得
+      window.onload = function() {
+        if (!GAS_API_URL || GAS_API_URL.includes("ここにコピーした")) {
+          document.getElementById('app').innerHTML = '<p style="color:#e53e3e; text-align:center;">GAS_API_URLが設定されていません。</p>';
+          return;
+        }
+
+        fetch(GAS_API_URL)
+          .then(response => {
+            if (!response.ok) throw new Error("ネットワーク応答が正常ではありません");
+            return response.json();
+          })
+          .then(data => {
+            masterData = data;
+            initApp(masterData);
+          })
+          .catch(error => {
+            console.error("データ取得エラー:", error);
+            document.getElementById('app').innerHTML = '<p style="color:#e53e3e; text-align:center;">マスタデータの読み込みに失敗しました。</p>';
+          });
+      };
+
+      // アプリ初期化・画面構築関数
+      function initApp(data) {
+        const app = document.getElementById('app');
+        app.innerHTML = `<p style="text-align:center; color:#38a169;">✅ マスタデータ読み込み完了 (${data.length}体)</p>`;
+        // ここに既存のキャラ選択リスト生成や計算処理の呼び出しを記述します
+      }
+
+      function showModal(chara) {
+        if (!chara) return;
+        document.getElementById('mIcon').src = chara.icon || 'https://via.placeholder.com/64?text=NoImage';
+        document.getElementById('mName').textContent = chara.name;
+        document.getElementById('mSub').textContent = '[' + (chara.tribe || '種族不明') + '] / [' + (chara.element || '属性不明') + ']';
+        document.getElementById('mAtk').textContent = chara.atk;
+        document.getElementById('mDef').textContent = chara.def;
+        document.getElementById('mSpd').textContent = chara.spd;
+        document.getElementById('mHp').textContent = chara.hp;
+        document.getElementById('mSp').textContent = chara.sp;
+        document.getElementById('mCrt').textContent = chara.crt;
+        document.getElementById('mRange').textContent = chara.range || '全般';
+        document.getElementById('charaModal').style.display = 'flex';
+      }
+
+      function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+      }
+    </script>
+  </body>
+</html>
