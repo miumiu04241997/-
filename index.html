@@ -195,6 +195,26 @@
         color: #fff;
       }
 
+      /* 比較用ターゲット選択ヘッダー */
+      .compare-header {
+        background: #ebf8ff;
+        border: 1px solid #bee3f8;
+        border-radius: 6px;
+        padding: 6px 8px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.72rem;
+      }
+      .compare-header select {
+        font-size: 0.7rem;
+        padding: 2px 4px;
+        border-radius: 4px;
+        border: 1px solid #90cdf4;
+        background: #fff;
+      }
+
       /* テーブルスタイル */
       table.result-table {
         width: 100%;
@@ -214,14 +234,24 @@
         border: 1px solid #e2e8f0;
       }
       .table-icon {
-        width: 32px;
-        height: 32px;
+        width: 28px;
+        height: 28px;
         border-radius: 50%;
         object-fit: cover;
-        display: block;
-        margin: 0 auto;
-        cursor: pointer;
+        display: inline-block;
+        vertical-align: middle;
         border: 1px solid #cbd5e0;
+      }
+      .compare-icon-cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        padding: 3px 1px;
+      }
+      .compare-arrow {
+        font-size: 0.6rem;
+        color: #a0aec0;
       }
       .val-cell {
         color: #e53e3e;
@@ -276,7 +306,7 @@
         border-radius: 4px;
       }
 
-      /* 詳細モーダル */
+      /* モーダル共通スタイル */
       .modal-overlay {
         display: none;
         position: fixed;
@@ -291,8 +321,8 @@
         background: #ffffff;
         padding: 16px 14px;
         border-radius: 12px;
-        width: 88%;
-        max-width: 320px;
+        width: 90%;
+        max-width: 340px;
         text-align: center;
       }
       .modal-icon {
@@ -345,16 +375,72 @@
         font-weight: bold;
       }
 
+      /* 保存・読込モーダルのアイテム */
+      .slot-item-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin: 10px 0;
+        max-height: 260px;
+        overflow-y: auto;
+      }
+      .slot-item-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 8px;
+        background: #f8fafc;
+        text-align: left;
+      }
+      .slot-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+      }
+      .slot-item-title {
+        font-size: 0.78rem;
+        font-weight: bold;
+        color: #2b6cb0;
+      }
+      .slot-item-icons {
+        display: flex;
+        gap: 4px;
+      }
+      .slot-mini-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #edf2f7;
+        border: 1px solid #cbd5e0;
+      }
+      .modal-input {
+        width: 100%;
+        padding: 6px;
+        font-size: 0.8rem;
+        border: 1px solid #cbd5e0;
+        border-radius: 6px;
+        margin-top: 4px;
+      }
+
+      /* フッター＆権利表記 */
       .ad-footer {
         margin-top: 20px;
         text-align: center;
-        padding: 6px 0;
+        padding: 6px 0 0 0;
         border-top: 1px solid #edf2f7;
       }
       .ad-label {
         font-size: 9px;
         color: #a0aec0;
         margin-bottom: 4px;
+      }
+      .copyright-footer {
+        font-size: 0.65rem;
+        color: #a0aec0;
+        text-align: center;
+        margin-top: 8px;
+        line-height: 1.3;
       }
     </style>
   </head>
@@ -364,8 +450,8 @@
 
       <!-- アクションバー -->
       <div class="action-bar">
-        <button class="action-btn btn-save" onclick="saveCurrentParty()">💾 PT保存</button>
-        <button class="action-btn btn-load" onclick="loadSavedParty()">📂 PT読込</button>
+        <button class="action-btn btn-save" onclick="openSaveModal()">💾 PT保存</button>
+        <button class="action-btn btn-load" onclick="openLoadModal()">📂 PT読込</button>
         <button class="action-btn btn-clear" onclick="clearParty()">🗑️ クリア</button>
       </div>
 
@@ -414,9 +500,9 @@
             <select id="sortFilter" onchange="onFilterChange()">
               <option value="default">標準 (登録順)</option>
               <option value="atk_desc">攻撃 (高い順)</option>
-              <option value="atk_asc">攻撃 (低い順)</option>
+              <option value="hp_desc">HP (高い順)</option>
               <option value="spd_desc">素早さ (高い順)</option>
-              <option value="spd_asc">素早さ (低い順)</option>
+              <option value="sp_desc">SP (高い順)</option>
               <option value="crt_desc">Crt (高い順)</option>
               <option value="name_asc">名前 (五十音順)</option>
             </select>
@@ -450,7 +536,13 @@
         <div id="tabStatCalc" class="view-tab" onclick="setViewMode('statCalc')">✏️ 実数値計算</div>
       </div>
 
-      <!-- 実数値入力アコーディオン -->
+      <!-- 保存PT比較用の枠選択ヘッダー（比較タブ選択時のみ表示） -->
+      <div id="compareHeaderArea" class="compare-header" style="display:none;">
+        <span>🔍 比較対象枠:</span>
+        <select id="compareSlotSelect" onchange="recalculatePassives()"></select>
+      </div>
+
+      <!-- 実数値入力アコーディオン（実数値モード時のみ表示） -->
       <div id="baseStatInputsArea" class="base-inputs-container" style="display:none;">
         <div style="font-size:0.68rem; font-weight:bold; color:#4a5568; margin-bottom:6px;">自キャラの基礎ステータスを入力（攻撃/HP/防御/素早さ/SP/Crt）</div>
         <div id="statInputRows"></div>
@@ -461,15 +553,18 @@
         <div class="empty-msg">キャラを選択してください</div>
       </div>
 
-      <!-- 最下部広告枠 -->
+      <!-- 最下部広告枠＆権利表記 -->
       <div class="ad-footer">
         <div class="ad-label">スポンサーリンク</div>
         <div style="font-size:10px; color:#cbd5e0; padding:6px; border:1px dashed #e2e8f0; border-radius:4px;">広告枠 (320×50px)</div>
       </div>
+      <div class="copyright-footer">
+        当ツールは非公式であり、ゲーム内データの著作権は有限会社アイティルに帰属します
+      </div>
     </div>
 
     <!-- 詳細モーダル -->
-    <div id="detailModal" class="modal-overlay" onclick="closeModal()">
+    <div id="detailModal" class="modal-overlay" onclick="closeModal('detailModal')">
       <div class="modal-content" onclick="event.stopPropagation()">
         <img id="mIcon" class="modal-icon" src="" onerror="this.src='https://via.placeholder.com/60?text=NoImage'">
         <h3 id="mName" class="modal-name">-</h3>
@@ -485,7 +580,29 @@
         <div class="modal-range">
           <strong>対象範囲:</strong> <span id="mRange">-</span>
         </div>
-        <button class="modal-close-btn" onclick="closeModal()">閉じる</button>
+        <button class="modal-close-btn" onclick="closeModal('detailModal')">閉じる</button>
+      </div>
+    </div>
+
+    <!-- PT保存モーダル -->
+    <div id="saveModal" class="modal-overlay" onclick="closeModal('saveModal')">
+      <div class="modal-content" onclick="event.stopPropagation()">
+        <h3 style="margin-top:0; font-size:0.95rem; color:#2b6cb0;">💾 パーティ保存 (5枠)</h3>
+        <div style="font-size:0.72rem; color:#718096; margin-bottom:8px;">保存先スロットを選択し、パーティ名を入力してください</div>
+        <div class="slot-item-list" id="saveSlotList"></div>
+        <div style="display:flex; gap:6px; justify-content:center; margin-top:10px;">
+          <button class="modal-close-btn" style="background:#e2e8f0; color:#4a5568;" onclick="closeModal('saveModal')">キャンセル</button>
+          <button class="modal-close-btn" onclick="executeSave()">保存する</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PT読込モーダル -->
+    <div id="loadModal" class="modal-overlay" onclick="closeModal('loadModal')">
+      <div class="modal-content" onclick="event.stopPropagation()">
+        <h3 style="margin-top:0; font-size:0.95rem; color:#276749;">📂 保存パーティの読込</h3>
+        <div class="slot-item-list" id="loadSlotList"></div>
+        <button class="modal-close-btn" style="background:#e2e8f0; color:#4a5568; margin-top:8px;" onclick="closeModal('loadModal')">閉じる</button>
       </div>
     </div>
 
@@ -505,6 +622,16 @@
         { atk: 0, hp: 0, def: 0, spd: 0, sp: 0, crt: 0 }
       ];
 
+      // 5枠保存ストレージの初期化
+      let savedSlots = [
+        { id: 0, name: 'パーティ 1', party: [null, null, null, null, null], baseStats: null },
+        { id: 1, name: 'パーティ 2', party: [null, null, null, null, null], baseStats: null },
+        { id: 2, name: 'パーティ 3', party: [null, null, null, null, null], baseStats: null },
+        { id: 3, name: 'パーティ 4', party: [null, null, null, null, null], baseStats: null },
+        { id: 4, name: 'パーティ 5', party: [null, null, null, null, null], baseStats: null }
+      ];
+
+      let selectedSaveTargetSlot = 0;
       let filterMode = 'chara';
       let currentView = 'percent';
 
@@ -516,7 +643,6 @@
         return isNaN(num) ? 0 : num;
       }
 
-      // 種族名の完全一致判定用関数（魔神と神を明確分離）
       function isTribeMatch(t1, t2) {
         if (!t1 || !t2) return false;
         const c1 = String(t1).replace('族', '').trim();
@@ -524,25 +650,31 @@
         return c1 === c2;
       }
 
-      // 対象テキストから言及されている種族を精度高く抽出
       function getMentionedTribes(rangeStr) {
         const range = String(rangeStr || '');
         const tribes = [];
-        
-        if (range.includes('魔神')) {
+        let checkText = range;
+
+        if (checkText.includes('魔神')) {
           tribes.push('魔神');
-        }
-        
-        const rangeWithoutMajin = range.replace(/魔神/g, '');
-        if (rangeWithoutMajin.includes('神族') || rangeWithoutMajin.includes('神')) {
-          tribes.push('神族');
+          checkText = checkText.replace(/魔神/g, '');
         }
 
-        const others = ['魔族', '異端', '聖人', '飛天', '魔獣', '聖獣', '精霊', '鬼族'];
-        others.forEach(tr => {
-          const clean = tr.replace('族', '');
-          if (range.includes(tr) || range.includes(clean)) {
-            tribes.push(tr);
+        const tribeList = [
+          { name: '神族', keys: ['神族', '神'] },
+          { name: '魔族', keys: ['魔族'] },
+          { name: '魔獣', keys: ['魔獣'] },
+          { name: '聖人', keys: ['聖人'] },
+          { name: '聖獣', keys: ['聖獣'] },
+          { name: '異端', keys: ['異端'] },
+          { name: '飛天', keys: ['飛天'] },
+          { name: '精霊', keys: ['精霊'] },
+          { name: '鬼族', keys: ['鬼族', '鬼'] }
+        ];
+
+        tribeList.forEach(t => {
+          if (t.keys.some(k => checkText.includes(k))) {
+            tribes.push(t.name);
           }
         });
 
@@ -550,11 +682,18 @@
       }
 
       window.onload = function() {
+        // ストレージデータの読み込み
+        const localData = localStorage.getItem('gvg_saved_slots_v5');
+        if (localData) {
+          try { savedSlots = JSON.parse(localData); } catch(e){}
+        }
+
         fetch(GAS_API_URL)
           .then(res => res.json())
           .then(data => {
             masterData = data.map((item, idx) => ({ ...item, originalIdx: idx }));
             updateAllSelects();
+            updateCompareHeaderSelect();
           })
           .catch(err => {
             console.error(err);
@@ -575,12 +714,13 @@
         document.getElementById('tabCompare').className = `view-tab ${mode === 'compare' ? 'active' : ''}`;
         document.getElementById('tabStatCalc').className = `view-tab ${mode === 'statCalc' ? 'active' : ''}`;
 
+        document.getElementById('compareHeaderArea').style.display = (mode === 'compare') ? 'flex' : 'none';
         document.getElementById('baseStatInputsArea').style.display = (mode === 'statCalc') ? 'block' : 'none';
+
         if (mode === 'statCalc') renderStatInputRows();
         recalculatePassives();
       }
 
-      // 実戦編成でのパッシブ合算用判定
       function isApplicable(giver, receiver) {
         if (!giver || !receiver) return false;
         const range = String(giver.range || '');
@@ -628,7 +768,6 @@
         return true;
       }
 
-      // 精密なパッシブ対象絞り込み判定
       function matchPassiveRange(item, selectedTribe, selectedElem) {
         const range = String(item.range || '');
         const selTribe = selectedTribe === 'すべて' ? '' : selectedTribe;
@@ -638,7 +777,6 @@
 
         const isGlobal = range.includes('全般') || range.includes('全体') || range.includes('すべての味方');
 
-        // --- 種族適合判定 ---
         let tribeOk = false;
         if (!selTribe) {
           tribeOk = true;
@@ -655,7 +793,6 @@
           }
         }
 
-        // --- 属性適合判定 ---
         let elemOk = false;
         if (!selElem) {
           elemOk = true;
@@ -712,9 +849,9 @@
         });
 
         if (sVal === 'atk_desc') list.sort((a,b) => parseNum(b.atk) - parseNum(a.atk));
-        else if (sVal === 'atk_asc') list.sort((a,b) => parseNum(a.atk) - parseNum(b.atk));
+        else if (sVal === 'hp_desc') list.sort((a,b) => parseNum(b.hp) - parseNum(a.hp));
         else if (sVal === 'spd_desc') list.sort((a,b) => parseNum(b.spd) - parseNum(a.spd));
-        else if (sVal === 'spd_asc') list.sort((a,b) => parseNum(a.spd) - parseNum(b.spd));
+        else if (sVal === 'sp_desc') list.sort((a,b) => parseNum(b.sp) - parseNum(a.sp));
         else if (sVal === 'crt_desc') list.sort((a,b) => parseNum(b.crt) - parseNum(a.crt));
         else if (sVal === 'name_asc') list.sort((a,b) => (a.name||'').localeCompare(b.name||'', 'ja'));
 
@@ -840,7 +977,7 @@
         results.forEach(res => {
           html += `
             <tr>
-              <td><img class="table-icon" src="${res.chara.icon || 'https://via.placeholder.com/32?text=No'}" onclick="openModal(${res.slot})" onerror="this.src='https://via.placeholder.com/32?text=No'"></td>
+              <td><img class="table-icon" src="${res.chara.icon || 'https://via.placeholder.com/32?text=No'}" onclick="openModal('detailModal', ${res.slot})" onerror="this.src='https://via.placeholder.com/32?text=No'"></td>
               <td class="val-cell">+${res.stats.atk}%</td>
               <td class="val-cell">+${res.stats.hp}%</td>
               <td class="val-cell">+${res.stats.def}%</td>
@@ -854,16 +991,18 @@
         document.getElementById('tableContainer').innerHTML = html;
       }
 
+      // 保存PT比較テーブル描画（現在キャラ vs 保存枠キャラがひと目で分かるUI）
       function renderCompareTable(currentResults) {
-        const savedDataStr = localStorage.getItem('gvg_saved_party');
-        if (!savedDataStr) {
-          document.getElementById('tableContainer').innerHTML = '<div class="empty-msg">「💾 PT保存」されたデータがありません</div>';
+        const targetSlotIdx = parseInt(document.getElementById('compareSlotSelect').value || "0", 10);
+        const targetSlot = savedSlots[targetSlotIdx];
+
+        if (!targetSlot || !targetSlot.party.some(p => p !== null)) {
+          document.getElementById('tableContainer').innerHTML = `<div class="empty-msg">「${targetSlot ? targetSlot.name : '選択枠'}」には保存されたデータがありません</div>`;
           return;
         }
 
-        const savedParty = JSON.parse(savedDataStr);
         const savedActive = [];
-        savedParty.forEach((cIdx, sIdx) => {
+        targetSlot.party.forEach((cIdx, sIdx) => {
           if (cIdx !== null && masterData[cIdx]) {
             savedActive.push({ slot: sIdx, chara: masterData[cIdx] });
           }
@@ -888,7 +1027,7 @@
           <table class="result-table">
             <thead>
               <tr>
-                <th style="width:38px;">キャラ</th>
+                <th style="width:72px;">編成比較</th>
                 <th>攻撃</th>
                 <th>HP</th>
                 <th>防御</th>
@@ -902,6 +1041,9 @@
 
         currentResults.forEach(res => {
           const savedMatch = savedResults.find(s => s.slot === res.slot);
+          const savedCharaIdx = targetSlot.party[res.slot];
+          const savedChara = (savedCharaIdx !== null && masterData[savedCharaIdx]) ? masterData[savedCharaIdx] : null;
+
           const sStats = savedMatch ? savedMatch.stats : { atk: 0, hp: 0, def: 0, spd: 0, sp: 0, crt: 0 };
 
           function renderDiff(cur, sav) {
@@ -913,9 +1055,18 @@
             return `+${cur}% ${diffHtml}`;
           }
 
+          const curIconSrc = res.chara.icon || 'https://via.placeholder.com/28?text=No';
+          const savIconSrc = savedChara ? (savedChara.icon || 'https://via.placeholder.com/28?text=No') : 'https://via.placeholder.com/28?text=空';
+
           html += `
             <tr>
-              <td><img class="table-icon" src="${res.chara.icon || 'https://via.placeholder.com/32?text=No'}" onclick="openModal(${res.slot})" onerror="this.src='https://via.placeholder.com/32?text=No'"></td>
+              <td>
+                <div class="compare-icon-cell">
+                  <img class="table-icon" src="${curIconSrc}" title="現在: ${res.chara.name}" onclick="openModal('detailModal', ${res.slot})">
+                  <span class="compare-arrow">➔</span>
+                  <img class="table-icon" style="opacity:0.75;" src="${savIconSrc}" title="保存PT: ${savedChara ? savedChara.name : '未選択'}">
+                </div>
+              </td>
               <td class="val-cell">${renderDiff(res.stats.atk, sStats.atk)}</td>
               <td class="val-cell">${renderDiff(res.stats.hp, sStats.hp)}</td>
               <td class="val-cell">${renderDiff(res.stats.def, sStats.def)}</td>
@@ -985,7 +1136,7 @@
 
           html += `
             <tr>
-              <td><img class="table-icon" src="${res.chara.icon || 'https://via.placeholder.com/32?text=No'}" onclick="openModal(${res.slot})" onerror="this.src='https://via.placeholder.com/32?text=No'"></td>
+              <td><img class="table-icon" src="${res.chara.icon || 'https://via.placeholder.com/32?text=No'}" onclick="openModal('detailModal', ${res.slot})" onerror="this.src='https://via.placeholder.com/32?text=No'"></td>
               <td class="val-cell">${calcFinal(b.atk, res.stats.atk)}</td>
               <td class="val-cell">${calcFinal(b.hp, res.stats.hp)}</td>
               <td class="val-cell">${calcFinal(b.def, res.stats.def)}</td>
@@ -1000,20 +1151,95 @@
         document.getElementById('tableContainer').innerHTML = html;
       }
 
-      function saveCurrentParty() {
+      // --- PT保存モーダル・管理機能 ---
+      function openSaveModal() {
         if (!party.some(p => p !== null)) return alert('保存するキャラが選択されていません！');
-        localStorage.setItem('gvg_saved_party', JSON.stringify(party));
-        localStorage.setItem('gvg_saved_stats', JSON.stringify(baseStats));
-        alert('現在のパーティを保存しました！');
+
+        const container = document.getElementById('saveSlotList');
+        container.innerHTML = '';
+
+        savedSlots.forEach((slot, idx) => {
+          const card = document.createElement('div');
+          card.className = 'slot-item-card';
+
+          let iconsHtml = '';
+          slot.party.forEach(cIdx => {
+            const chara = (cIdx !== null && masterData[cIdx]) ? masterData[cIdx] : null;
+            const src = chara ? (chara.icon || 'https://via.placeholder.com/24?text=No') : 'https://via.placeholder.com/24?text=';
+            iconsHtml += `<img class="slot-mini-icon" src="${src}">`;
+          });
+
+          const isSelected = (selectedSaveTargetSlot === idx);
+          card.innerHTML = `
+            <div class="slot-item-header">
+              <label style="font-size:0.75rem; font-weight:bold;">
+                <input type="radio" name="saveTarget" value="${idx}" ${isSelected ? 'checked' : ''} onchange="selectedSaveTargetSlot=${idx}"> 枠 ${idx+1}
+              </label>
+              <div class="slot-item-icons">${iconsHtml}</div>
+            </div>
+            <input type="text" class="modal-input" id="slotNameInput_${idx}" value="${slot.name}" placeholder="パーティ名を入力">
+          `;
+          container.appendChild(card);
+        });
+
+        document.getElementById('saveModal').style.display = 'flex';
       }
 
-      function loadSavedParty() {
-        const savedData = localStorage.getItem('gvg_saved_party');
-        if (!savedData) return alert('保存されたパーティが見つかりません。');
-        party = JSON.parse(savedData);
+      function executeSave() {
+        const inputName = document.getElementById(`slotNameInput_${selectedSaveTargetSlot}`).value.trim() || `パーティ ${selectedSaveTargetSlot+1}`;
+        
+        savedSlots[selectedSaveTargetSlot] = {
+          id: selectedSaveTargetSlot,
+          name: inputName,
+          party: [...party],
+          baseStats: JSON.parse(JSON.stringify(baseStats))
+        };
 
-        const savedStats = localStorage.getItem('gvg_saved_stats');
-        if (savedStats) baseStats = JSON.parse(savedStats);
+        localStorage.setItem('gvg_saved_slots_v5', JSON.stringify(savedSlots));
+        updateCompareHeaderSelect();
+        closeModal('saveModal');
+        alert(`枠${selectedSaveTargetSlot+1} [${inputName}] に保存しました！`);
+      }
+
+      // --- PT読込モーダル機能 ---
+      function openLoadModal() {
+        const container = document.getElementById('loadSlotList');
+        container.innerHTML = '';
+
+        savedSlots.forEach((slot, idx) => {
+          const card = document.createElement('div');
+          card.className = 'slot-item-card';
+
+          let iconsHtml = '';
+          let count = 0;
+          slot.party.forEach(cIdx => {
+            if (cIdx !== null) count++;
+            const chara = (cIdx !== null && masterData[cIdx]) ? masterData[cIdx] : null;
+            const src = chara ? (chara.icon || 'https://via.placeholder.com/24?text=No') : 'https://via.placeholder.com/24?text=';
+            iconsHtml += `<img class="slot-mini-icon" src="${src}">`;
+          });
+
+          const hasData = count > 0;
+
+          card.innerHTML = `
+            <div class="slot-item-header">
+              <div class="slot-item-title">${slot.name} (${count}/5体)</div>
+              <button class="action-btn btn-load" style="padding:2px 8px;" ${!hasData ? 'disabled' : ''} onclick="loadSlot(${idx})">読込</button>
+            </div>
+            <div class="slot-item-icons">${iconsHtml}</div>
+          `;
+          container.appendChild(card);
+        });
+
+        document.getElementById('loadModal').style.display = 'flex';
+      }
+
+      function loadSlot(slotIdx) {
+        const target = savedSlots[slotIdx];
+        if (!target) return;
+
+        party = [...target.party];
+        if (target.baseStats) baseStats = JSON.parse(JSON.stringify(target.baseStats));
 
         for (let i = 0; i < 5; i++) {
           updateSlotCardUI(i);
@@ -1021,7 +1247,21 @@
         updateAllSelects();
         if (currentView === 'statCalc') renderStatInputRows();
         recalculatePassives();
-        alert('保存されたパーティを読み込みました！');
+        closeModal('loadModal');
+        alert(`[${target.name}] を読み込みました！`);
+      }
+
+      // 比較枠選択ドロップダウンの更新
+      function updateCompareHeaderSelect() {
+        const sel = document.getElementById('compareSlotSelect');
+        sel.innerHTML = '';
+        savedSlots.forEach((slot, idx) => {
+          const opt = document.createElement('option');
+          opt.value = idx;
+          const count = slot.party.filter(p => p !== null).length;
+          opt.textContent = `枠${idx+1}: ${slot.name} (${count}体)`;
+          sel.appendChild(opt);
+        });
       }
 
       function clearParty() {
@@ -1034,27 +1274,28 @@
         recalculatePassives();
       }
 
-      function openModal(slotIdx) {
-        const charaIdx = party[slotIdx];
-        if (charaIdx === null || !masterData[charaIdx]) return;
+      function openModal(modalId, slotIdx) {
+        if (modalId === 'detailModal') {
+          const charaIdx = party[slotIdx];
+          if (charaIdx === null || !masterData[charaIdx]) return;
 
-        const chara = masterData[charaIdx];
-        document.getElementById('mIcon').src = chara.icon || 'https://via.placeholder.com/60?text=NoImage';
-        document.getElementById('mName').textContent = chara.name;
-        document.getElementById('mSub').textContent = `[${chara.tribe || '種族不明'}] / [${chara.element || '属性不明'}]`;
-        document.getElementById('mAtk').textContent = `${chara.atk || 0}%`;
-        document.getElementById('mHp').textContent = `${chara.hp || 0}%`;
-        document.getElementById('mDef').textContent = `${chara.def || 0}%`;
-        document.getElementById('mSpd').textContent = `${chara.spd || 0}%`;
-        document.getElementById('mSp').textContent = `${chara.sp || 0}%`;
-        document.getElementById('mCrt').textContent = `${chara.crt || 0}%`;
-        document.getElementById('mRange').textContent = chara.range || '全般';
-
-        document.getElementById('detailModal').style.display = 'flex';
+          const chara = masterData[charaIdx];
+          document.getElementById('mIcon').src = chara.icon || 'https://via.placeholder.com/60?text=NoImage';
+          document.getElementById('mName').textContent = chara.name;
+          document.getElementById('mSub').textContent = `[${chara.tribe || '種族不明'}] / [${chara.element || '属性不明'}]`;
+          document.getElementById('mAtk').textContent = `${chara.atk || 0}%`;
+          document.getElementById('mHp').textContent = `${chara.hp || 0}%`;
+          document.getElementById('mDef').textContent = `${chara.def || 0}%`;
+          document.getElementById('mSpd').textContent = `${chara.spd || 0}%`;
+          document.getElementById('mSp').textContent = `${chara.sp || 0}%`;
+          document.getElementById('mCrt').textContent = `${chara.crt || 0}%`;
+          document.getElementById('mRange').textContent = chara.range || '全般';
+        }
+        document.getElementById(modalId).style.display = 'flex';
       }
 
-      function closeModal() {
-        document.getElementById('detailModal').style.display = 'none';
+      function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
       }
     </script>
   </body>
