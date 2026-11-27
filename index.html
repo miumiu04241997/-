@@ -255,12 +255,32 @@
       margin-bottom: 14px;
     }
 
+    .import-box {
+      background: rgba(236, 253, 245, 0.75);
+      border: 1px dashed #6ee7b7;
+      border-radius: 14px;
+      padding: 12px;
+      margin-top: 16px;
+    }
+
     .parse-btn {
       margin-top: 6px;
       padding: 8px 12px;
       border: none;
       border-radius: 9px;
       background: #0f172a;
+      color: #fff;
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .import-btn {
+      margin-top: 6px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 9px;
+      background: #059669;
       color: #fff;
       font-size: 0.76rem;
       font-weight: 600;
@@ -332,14 +352,14 @@
         <button type="button" class="mini-btn" id="logoutBtn">ログアウト</button>
       </div>
 
-      <button type="button" class="submit-btn" id="openAdminBtn">🛠️ キャラを追加する（Firestore）</button>
+      <button type="button" class="submit-btn" id="openAdminBtn">🛠️ キャラを追加・一括移行（Firestore）</button>
       <button type="button" class="secondary-btn" id="goToolBtn">計算ツールへ進む</button>
     </div>
 
-    <!-- 管理者：キャラ追加＆Wikiテキスト自動解析 -->
+    <!-- 管理者：キャラ追加＆一括インポート -->
     <div id="adminArea" class="admin-box">
       <div class="top-bar">
-        <div class="user-chip" id="adminChip">キャラ追加</div>
+        <div class="user-chip" id="adminChip">キャラ管理</div>
         <button type="button" class="mini-btn" id="backToMenuBtn">← 戻る</button>
       </div>
 
@@ -407,6 +427,15 @@
 
         <button type="submit" class="submit-btn" id="saveCharaBtn">Firestore に保存する</button>
       </form>
+
+      <!-- スプシ（TSV / CSV）一括移行ボックス -->
+      <div class="import-box">
+        <div class="field" style="margin-bottom: 4px;">
+          <label for="sheetBulkInput">📥 スプシから一括移行（A列〜K列をそのままコピペ）</label>
+          <textarea id="sheetBulkInput" placeholder="スプレッドシートのA〜K列を選択してコピーし、ここにそのまま貼り付けてください（見出し行は自動でスキップされます）。"></textarea>
+        </div>
+        <button type="button" class="import-btn" id="bulkImportBtn">📥 一括インポート実行</button>
+      </div>
     </div>
 
     <div id="statusMsg" class="status-msg" aria-live="polite"></div>
@@ -427,6 +456,8 @@
       getFirestore,
       collection,
       addDoc,
+      writeBatch,
+      doc,
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
@@ -445,7 +476,6 @@
     const db = getFirestore(app);
     const googleProvider = new GoogleAuthProvider();
 
-    // 管理者として許可するメールアドレス（必要に応じて追加可能）
     const ADMIN_EMAILS = ["miumiu04241997@nojobunoraifu.com"];
 
     let isSignupMode = false;
@@ -469,6 +499,78 @@
     function isAdminUser(user) {
       if (!user || !user.email) return false;
       return ADMIN_EMAILS.includes(user.email.toLowerCase());
+    }
+
+    function cleanCell(val) {
+      return String(val || "").replace(/^"|"$/g, "").replace(/\r?\n/g, " ").replace(/\s+/g, " ").trim();
+    }
+
+    function toNum(val) {
+      const n = parseFloat(String(val || "0").replace(/[^0-9.-]/g, ""));
+      return Number.isNaN(n) ? 0 : n;
+    }
+
+    // スプレッドシートのコピー（タブ区切り・改行を含むセル対応）をパース
+    function parseSheetRows(rawText) {
+      const rows = [];
+      let currentRow = [];
+      let currentCell = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < rawText.length; i++) {
+        const ch = rawText[i];
+        const next = rawText[i + 1];
+
+        if (ch === '"') {
+          if (inQuotes && next === '"') {
+            currentCell += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (ch === "\t" && !inQuotes) {
+          currentRow.push(currentCell);
+          currentCell = "";
+        } else if ((ch === "\n" || (ch === "\r" && next === "\n")) && !inQuotes) {
+          if (ch === "\r") i++;
+          currentRow.push(currentCell);
+          rows.push(currentRow);
+          currentRow = [];
+          currentCell = "";
+        } else if (ch === "\r" && !inQuotes) {
+          currentRow.push(currentCell);
+          rows.push(currentRow);
+          currentRow = [];
+          currentCell = "";
+        } else {
+          currentCell += ch;
+        }
+      }
+      if (currentCell.length > 0 || currentRow.length > 0) {
+        currentRow.push(currentCell);
+        rows.push(currentRow);
+      }
+
+      return rows
+        .map((cols) => {
+          const name = cleanCell(cols[0]);
+          if (!name || name === "名前") return null;
+          return {
+            name,
+            tribe: cleanCell(cols[1]),
+            element: cleanCell(cols[2]),
+            range: cleanCell(cols[3]),
+            atk: toNum(cols[4]),
+            def: toNum(cols[5]),
+            spd: toNum(cols[6]),
+            hp: toNum(cols[7]),
+            sp: toNum(cols[8]),
+            crt: toNum(cols[9]),
+            icon: cleanCell(cols[10]),
+            updatedAt: serverTimestamp()
+          };
+        })
+        .filter(Boolean);
     }
 
     tabLogin.addEventListener("click", () => {
@@ -528,7 +630,7 @@
       }
       loggedInArea.style.display = "none";
       adminArea.style.display = "block";
-      setStatus("Wikiの文章を貼るか、直接入力して保存できます。");
+      setStatus("1件追加またはスプシからの一括移行ができます。");
     });
 
     document.getElementById("backToMenuBtn").addEventListener("click", () => {
@@ -545,7 +647,6 @@
       setStatus("メインツール画面の統合準備ができました。", "success");
     });
 
-    // Wiki貼り付けテキストから数値・範囲を自動抽出
     document.getElementById("parseWikiBtn").addEventListener("click", () => {
       const raw = document.getElementById("wikiRawInput").value || "";
       if (!raw.trim()) return setStatus("解析するテキストを貼り付けてください。", "error");
@@ -573,16 +674,14 @@
       if (sp !== null) document.getElementById("cSp").value = sp;
       if (crt !== null) document.getElementById("cCrt").value = crt;
 
-      // 「〜の下記の値がUP」のような範囲文があれば抽出
       const rangeMatch = raw.match(/([^。\n]*?(?:編成されている|味方|自身|属性|種族)[^。\n]*?(?:UP|アップ)?)/);
       if (rangeMatch && rangeMatch[1].trim()) {
-        document.getElementById("cRange").value = rangeMatch[1].trim();
+        document.getElementById("cRange").value = cleanCell(rangeMatch[1]);
       }
 
       setStatus("テキストから数値を自動入力しました。内容を確認してください。", "success");
     });
 
-    // Firestore へキャラを保存
     document.getElementById("addCharaForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       if (!currentUser || !isAdminUser(currentUser)) {
@@ -590,17 +689,17 @@
       }
 
       const payload = {
-        name: document.getElementById("cName").value.trim(),
-        tribe: document.getElementById("cTribe").value.trim(),
-        element: document.getElementById("cElement").value.trim(),
-        range: document.getElementById("cRange").value.trim(),
-        atk: Number(document.getElementById("cAtk").value) || 0,
-        def: Number(document.getElementById("cDef").value) || 0,
-        spd: Number(document.getElementById("cSpd").value) || 0,
-        hp: Number(document.getElementById("cHp").value) || 0,
-        sp: Number(document.getElementById("cSp").value) || 0,
-        crt: Number(document.getElementById("cCrt").value) || 0,
-        icon: document.getElementById("cIcon").value.trim(),
+        name: cleanCell(document.getElementById("cName").value),
+        tribe: cleanCell(document.getElementById("cTribe").value),
+        element: cleanCell(document.getElementById("cElement").value),
+        range: cleanCell(document.getElementById("cRange").value),
+        atk: toNum(document.getElementById("cAtk").value),
+        def: toNum(document.getElementById("cDef").value),
+        spd: toNum(document.getElementById("cSpd").value),
+        hp: toNum(document.getElementById("cHp").value),
+        sp: toNum(document.getElementById("cSp").value),
+        crt: toNum(document.getElementById("cCrt").value),
+        icon: cleanCell(document.getElementById("cIcon").value),
         updatedAt: serverTimestamp()
       };
 
@@ -615,6 +714,37 @@
       }
     });
 
+    // スプレッドシートのA〜K列コピーを一括でFirestoreへ移行
+    document.getElementById("bulkImportBtn").addEventListener("click", async () => {
+      if (!currentUser || !isAdminUser(currentUser)) {
+        return setStatus("管理者アカウントでログインしてください。", "error");
+      }
+
+      const raw = document.getElementById("sheetBulkInput").value || "";
+      const items = parseSheetRows(raw);
+      if (items.length === 0) {
+        return setStatus("移行できるデータが見つかりませんでした。A〜K列の行を貼り付けてください。", "error");
+      }
+
+      setStatus(`${items.length} 件のデータを Firestore に移行中...`);
+      try {
+        const chunkSize = 400;
+        for (let i = 0; i < items.length; i += chunkSize) {
+          const batch = writeBatch(db);
+          const slice = items.slice(i, i + chunkSize);
+          slice.forEach((item) => {
+            const ref = doc(collection(db, "characters"));
+            batch.set(ref, item);
+          });
+          await batch.commit();
+        }
+        setStatus(`${items.length} 件のキャラデータを Firestore に移行しました！`, "success");
+        document.getElementById("sheetBulkInput").value = "";
+      } catch (err) {
+        setStatus(err.message || "一括移行に失敗しました。", "error");
+      }
+    });
+
     onAuthStateChanged(auth, (user) => {
       currentUser = user;
       if (user) {
@@ -623,7 +753,7 @@
         loggedInArea.style.display = "block";
         userChip.textContent = user.email || user.displayName || "ログイン中";
         if (isAdminUser(user)) {
-          setStatus("管理者アカウントでログイン中です。キャラ追加が可能です。", "success");
+          setStatus("管理者アカウントでログイン中です。", "success");
         } else {
           setStatus("ログイン済みです。", "success");
         }
