@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>U-S-P | パッシブ計算</title>
+  <title>パッシブ計算</title>
   <style>
     :root {
       --bg-base: #0b1020;
@@ -312,7 +312,6 @@
       outline: none;
     }
 
-    /* アイコンなしのコンパクト5枠スロット */
     .slot-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -647,7 +646,7 @@
 <body>
   <main class="shell">
     <div class="header-row">
-      <h1 class="app-title">U-S-P パッシブ計算</h1>
+      <h1 class="app-title">パッシブ計算</h1>
       <div class="top-actions">
         <span class="user-chip" id="userChip">ゲスト</span>
         <button type="button" class="mini-btn" id="reloadDataBtn">↻ 再読込</button>
@@ -759,7 +758,7 @@
       </div>
 
       <div id="tableContainer">
-        <div class="empty-msg">Firestore からキャラデータを読み込み中...</div>
+        <div class="empty-msg">データを読み込み中...</div>
       </div>
     </div>
 
@@ -942,7 +941,7 @@
     }
 
     async function loadCharactersFromFirestore() {
-      setStatus("Firestore から読み込み中...");
+      setStatus("読み込み中...");
       try {
         const snap = await getDocs(collection(db, "characters"));
         const list = [];
@@ -1435,7 +1434,7 @@
         party: [...party],
         baseStats: JSON.parse(JSON.stringify(baseStats))
       };
-      localStorage.setItem("usp_saved_slots_v1", JSON.stringify(savedSlots));
+      localStorage.setItem("passive_saved_slots_v1", JSON.stringify(savedSlots));
       updateCompareHeaderSelect();
       closeModal("saveModal");
       setStatus(`枠${selectedSaveTargetSlot + 1} [${slotName}] に保存しました`, "success");
@@ -1593,7 +1592,7 @@
       }
     });
 
-    const localSlots = localStorage.getItem("usp_saved_slots_v1");
+    const localSlots = localStorage.getItem("passive_saved_slots_v1") || localStorage.getItem("usp_saved_slots_v1");
     if (localSlots) {
       try { savedSlots = JSON.parse(localSlots); } catch (e) {}
     }
