@@ -311,3 +311,328 @@
       </div>
 
       <form id="emailAuthForm">
+        <div class="field">
+          <label for="emailInput">メールアドレス</label>
+          <input id="emailInput" type="email" autocomplete="email" placeholder="name@example.com" required />
+        </div>
+        <div class="field">
+          <label for="passwordInput">パスワード（6文字以上）</label>
+          <input id="passwordInput" type="password" autocomplete="current-password" minlength="6" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="submit-btn" id="submitAuthBtn">ログイン</button>
+      </form>
+
+      <button type="button" class="guest-link" id="guestEnterBtn">ログインせずにゲストとして使う</button>
+    </div>
+
+    <!-- ログイン後メニュー -->
+    <div id="loggedInArea" class="logged-in-box">
+      <div class="top-bar">
+        <div class="user-chip" id="userChip">ログイン中</div>
+        <button type="button" class="mini-btn" id="logoutBtn">ログアウト</button>
+      </div>
+
+      <button type="button" class="submit-btn" id="openAdminBtn">🛠️ キャラを追加する（Firestore）</button>
+      <button type="button" class="secondary-btn" id="goToolBtn">計算ツールへ進む</button>
+    </div>
+
+    <!-- 管理者：キャラ追加＆Wikiテキスト自動解析 -->
+    <div id="adminArea" class="admin-box">
+      <div class="top-bar">
+        <div class="user-chip" id="adminChip">キャラ追加</div>
+        <button type="button" class="mini-btn" id="backToMenuBtn">← 戻る</button>
+      </div>
+
+      <div class="parse-box">
+        <div class="field" style="margin-bottom: 4px;">
+          <label for="wikiRawInput">Wikiのパッシブ文・数値を貼り付けて自動入力</label>
+          <textarea id="wikiRawInput" placeholder="例: 同じパーティに編成されている神族・飛天の下記の値がUP 攻撃+5% HP+25% 防御+10% SP+25%"></textarea>
+        </div>
+        <button type="button" class="parse-btn" id="parseWikiBtn">✨ テキストから自動入力</button>
+      </div>
+
+      <form id="addCharaForm">
+        <div class="field">
+          <label for="cName">名前（スプシA列）</label>
+          <input id="cName" type="text" required placeholder="例: アストラルヴィシュヌ" />
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label for="cTribe">種族（スプシB列）</label>
+            <input id="cTribe" type="text" required placeholder="例: 神族" />
+          </div>
+          <div class="field">
+            <label for="cElement">属性（スプシC列）</label>
+            <input id="cElement" type="text" required placeholder="例: 闇属性" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="cRange">パッシブ範囲（スプシD列）</label>
+          <input id="cRange" type="text" required placeholder="例: 同じパーティに編成されている神族の下記の値がUP" />
+        </div>
+
+        <div class="grid-3">
+          <div class="field">
+            <label for="cAtk">攻撃 %（E列）</label>
+            <input id="cAtk" type="number" value="0" required />
+          </div>
+          <div class="field">
+            <label for="cDef">防御 %（F列）</label>
+            <input id="cDef" type="number" value="0" required />
+          </div>
+          <div class="field">
+            <label for="cSpd">素早 %（G列）</label>
+            <input id="cSpd" type="number" value="0" required />
+          </div>
+          <div class="field">
+            <label for="cHp">HP %（H列）</label>
+            <input id="cHp" type="number" value="0" required />
+          </div>
+          <div class="field">
+            <label for="cSp">SP %（I列）</label>
+            <input id="cSp" type="number" value="0" required />
+          </div>
+          <div class="field">
+            <label for="cCrt">Crt %（J列）</label>
+            <input id="cCrt" type="number" value="0" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="cIcon">キャラアイコンURL（スプシK列）</label>
+          <input id="cIcon" type="url" placeholder="https://..." />
+        </div>
+
+        <button type="submit" class="submit-btn" id="saveCharaBtn">Firestore に保存する</button>
+      </form>
+    </div>
+
+    <div id="statusMsg" class="status-msg" aria-live="polite"></div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      GoogleAuthProvider,
+      signInWithPopup,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDZPgxYcZCunh-6HYaUiOfycr6mPTJBxH8",
+      authDomain: "u-s-p-55871.firebaseapp.com",
+      projectId: "u-s-p-55871",
+      storageBucket: "u-s-p-55871.firebasestorage.app",
+      messagingSenderId: "300966590941",
+      appId: "1:300966590941:web:a6e5eade16fd57dd7d1e34",
+      measurementId: "G-HCDVT2J5J3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const googleProvider = new GoogleAuthProvider();
+
+    // 管理者として許可するメールアドレス（必要に応じて追加可能）
+    const ADMIN_EMAILS = ["miumiu04241997@nojobunoraifu.com"];
+
+    let isSignupMode = false;
+    let currentUser = null;
+
+    const authFormArea = document.getElementById("authFormArea");
+    const loggedInArea = document.getElementById("loggedInArea");
+    const adminArea = document.getElementById("adminArea");
+    const userChip = document.getElementById("userChip");
+    const statusMsg = document.getElementById("statusMsg");
+    const tabLogin = document.getElementById("tabLogin");
+    const tabSignup = document.getElementById("tabSignup");
+    const submitAuthBtn = document.getElementById("submitAuthBtn");
+    const passwordInput = document.getElementById("passwordInput");
+
+    function setStatus(text, type = "") {
+      statusMsg.textContent = text;
+      statusMsg.className = `status-msg ${type}`.trim();
+    }
+
+    function isAdminUser(user) {
+      if (!user || !user.email) return false;
+      return ADMIN_EMAILS.includes(user.email.toLowerCase());
+    }
+
+    tabLogin.addEventListener("click", () => {
+      isSignupMode = false;
+      tabLogin.classList.add("active");
+      tabSignup.classList.remove("active");
+      submitAuthBtn.textContent = "ログイン";
+      passwordInput.setAttribute("autocomplete", "current-password");
+      setStatus("");
+    });
+
+    tabSignup.addEventListener("click", () => {
+      isSignupMode = true;
+      tabSignup.classList.add("active");
+      tabLogin.classList.remove("active");
+      submitAuthBtn.textContent = "アカウント作成";
+      passwordInput.setAttribute("autocomplete", "new-password");
+      setStatus("");
+    });
+
+    document.getElementById("googleLoginBtn").addEventListener("click", async () => {
+      setStatus("Googleログインを確認中...");
+      try {
+        await signInWithPopup(auth, googleProvider);
+      } catch (err) {
+        setStatus(err.message || "Googleログインに失敗しました。", "error");
+      }
+    });
+
+    document.getElementById("emailAuthForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("emailInput").value.trim();
+      const password = passwordInput.value;
+      setStatus(isSignupMode ? "アカウントを作成中..." : "ログイン中...");
+      try {
+        if (isSignupMode) {
+          await createUserWithEmailAndPassword(auth, email, password);
+          setStatus("アカウントを作成しました！", "success");
+        } else {
+          await signInWithEmailAndPassword(auth, email, password);
+        }
+      } catch (err) {
+        setStatus(err.message || "認証に失敗しました。", "error");
+      }
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await signOut(auth);
+      adminArea.style.display = "none";
+      setStatus("ログアウトしました。");
+    });
+
+    document.getElementById("openAdminBtn").addEventListener("click", () => {
+      if (!currentUser) return setStatus("ログインが必要です。", "error");
+      if (!isAdminUser(currentUser)) {
+        return setStatus("このアカウントにはキャラ追加権限がありません。", "error");
+      }
+      loggedInArea.style.display = "none";
+      adminArea.style.display = "block";
+      setStatus("Wikiの文章を貼るか、直接入力して保存できます。");
+    });
+
+    document.getElementById("backToMenuBtn").addEventListener("click", () => {
+      adminArea.style.display = "none";
+      loggedInArea.style.display = "block";
+      setStatus("");
+    });
+
+    document.getElementById("guestEnterBtn").addEventListener("click", () => {
+      setStatus("ゲストモードで開始します。", "success");
+    });
+
+    document.getElementById("goToolBtn").addEventListener("click", () => {
+      setStatus("メインツール画面の統合準備ができました。", "success");
+    });
+
+    // Wiki貼り付けテキストから数値・範囲を自動抽出
+    document.getElementById("parseWikiBtn").addEventListener("click", () => {
+      const raw = document.getElementById("wikiRawInput").value || "";
+      if (!raw.trim()) return setStatus("解析するテキストを貼り付けてください。", "error");
+
+      const extractStat = (labels) => {
+        for (const label of labels) {
+          const re = new RegExp(`${label}\\s*[+＋]?\\s*(\\d+)\\s*%?`, "i");
+          const m = raw.match(re);
+          if (m) return Number(m[1]);
+        }
+        return null;
+      };
+
+      const atk = extractStat(["攻撃", "ATK"]);
+      const def = extractStat(["防御", "DEF"]);
+      const spd = extractStat(["素早さ", "素早", "SPD"]);
+      const hp = extractStat(["HP"]);
+      const sp = extractStat(["SP"]);
+      const crt = extractStat(["Crt", "CRT", "クリティカル"]);
+
+      if (atk !== null) document.getElementById("cAtk").value = atk;
+      if (def !== null) document.getElementById("cDef").value = def;
+      if (spd !== null) document.getElementById("cSpd").value = spd;
+      if (hp !== null) document.getElementById("cHp").value = hp;
+      if (sp !== null) document.getElementById("cSp").value = sp;
+      if (crt !== null) document.getElementById("cCrt").value = crt;
+
+      // 「〜の下記の値がUP」のような範囲文があれば抽出
+      const rangeMatch = raw.match(/([^。\n]*?(?:編成されている|味方|自身|属性|種族)[^。\n]*?(?:UP|アップ)?)/);
+      if (rangeMatch && rangeMatch[1].trim()) {
+        document.getElementById("cRange").value = rangeMatch[1].trim();
+      }
+
+      setStatus("テキストから数値を自動入力しました。内容を確認してください。", "success");
+    });
+
+    // Firestore へキャラを保存
+    document.getElementById("addCharaForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!currentUser || !isAdminUser(currentUser)) {
+        return setStatus("管理者アカウントでログインしてください。", "error");
+      }
+
+      const payload = {
+        name: document.getElementById("cName").value.trim(),
+        tribe: document.getElementById("cTribe").value.trim(),
+        element: document.getElementById("cElement").value.trim(),
+        range: document.getElementById("cRange").value.trim(),
+        atk: Number(document.getElementById("cAtk").value) || 0,
+        def: Number(document.getElementById("cDef").value) || 0,
+        spd: Number(document.getElementById("cSpd").value) || 0,
+        hp: Number(document.getElementById("cHp").value) || 0,
+        sp: Number(document.getElementById("cSp").value) || 0,
+        crt: Number(document.getElementById("cCrt").value) || 0,
+        icon: document.getElementById("cIcon").value.trim(),
+        updatedAt: serverTimestamp()
+      };
+
+      setStatus("Firestore に保存中...");
+      try {
+        await addDoc(collection(db, "characters"), payload);
+        setStatus(`「${payload.name}」を Firestore に保存しました！`, "success");
+        document.getElementById("addCharaForm").reset();
+        document.getElementById("wikiRawInput").value = "";
+      } catch (err) {
+        setStatus(err.message || "保存に失敗しました。Firestoreのルールを確認してください。", "error");
+      }
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+      if (user) {
+        authFormArea.style.display = "none";
+        adminArea.style.display = "none";
+        loggedInArea.style.display = "block";
+        userChip.textContent = user.email || user.displayName || "ログイン中";
+        if (isAdminUser(user)) {
+          setStatus("管理者アカウントでログイン中です。キャラ追加が可能です。", "success");
+        } else {
+          setStatus("ログイン済みです。", "success");
+        }
+      } else {
+        authFormArea.style.display = "block";
+        loggedInArea.style.display = "none";
+        adminArea.style.display = "none";
+      }
+    });
+  </script>
+</body>
+</html>
