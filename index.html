@@ -3,44 +3,38 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>U-S-P | パッシブ判定計算＆キャラ管理</title>
+  <title>U-S-P | パッシブ計算</title>
   <style>
     :root {
       --bg-base: #0b1020;
       --bg-glow-1: rgba(99, 102, 241, 0.22);
       --bg-glow-2: rgba(14, 165, 233, 0.16);
-      --bg-glow-3: rgba(236, 72, 153, 0.12);
-      --surface: rgba(19, 27, 46, 0.88);
-      --surface-elevated: rgba(28, 39, 66, 0.92);
-      --surface-soft: rgba(15, 23, 42, 0.65);
+      --surface: rgba(19, 27, 46, 0.9);
+      --surface-elevated: rgba(28, 39, 66, 0.94);
+      --surface-soft: rgba(15, 23, 42, 0.7);
       --border: rgba(148, 163, 184, 0.18);
       --border-strong: rgba(129, 140, 248, 0.45);
       --text-main: #f8fafc;
       --text-sub: #94a3b8;
       --text-muted: #64748b;
-      --accent: #6366f1;
       --accent-2: #38bdf8;
       --accent-grad: linear-gradient(135deg, #6366f1 0%, #38bdf8 100%);
       --danger: #fb7185;
       --success: #34d399;
-      --warning: #fbbf24;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
       min-height: 100dvh;
-      padding: 14px 10px 28px;
+      padding: 10px 8px 24px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
       color: var(--text-main);
       background-color: var(--bg-base);
       background-image:
         radial-gradient(circle at 12% 10%, var(--bg-glow-1), transparent 45%),
-        radial-gradient(circle at 88% 14%, var(--bg-glow-2), transparent 45%),
-        radial-gradient(circle at 60% 90%, var(--bg-glow-3), transparent 50%);
+        radial-gradient(circle at 88% 14%, var(--bg-glow-2), transparent 45%);
       -webkit-tap-highlight-color: transparent;
     }
 
@@ -49,80 +43,41 @@
       max-width: 480px;
       margin: 0 auto;
       background: var(--surface);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
       border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 18px 14px 16px;
-      box-shadow:
-        0 24px 60px -18px rgba(0, 0, 0, 0.65),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 14px 12px;
+      box-shadow: 0 20px 50px -16px rgba(0, 0, 0, 0.65);
     }
 
-    .brand {
-      text-align: center;
-      margin-bottom: 14px;
-    }
-
-    .brand-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      background: var(--accent-grad);
-      color: #ffffff;
-      font-weight: 800;
-      font-size: 0.92rem;
-      letter-spacing: 0.06em;
-      box-shadow: 0 10px 24px -6px rgba(99, 102, 241, 0.55);
-      margin-bottom: 8px;
-    }
-
-    .brand h1 {
-      margin: 0;
-      font-size: 1.2rem;
-      font-weight: 800;
-      letter-spacing: -0.01em;
-      background: linear-gradient(90deg, #ffffff 0%, #cbd5e1 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .brand p {
-      margin: 4px 0 0;
-      font-size: 0.72rem;
-      color: var(--text-sub);
-    }
-
-    .auth-box {
-      max-width: 400px;
-      margin: 0 auto;
-    }
-
-    .top-bar {
+    .header-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 8px;
-      margin-bottom: 12px;
-      padding: 8px 10px;
-      border-radius: 14px;
-      background: var(--surface-soft);
-      border: 1px solid var(--border);
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
       flex-wrap: wrap;
     }
 
+    .app-title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
     .user-chip {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       font-weight: 600;
-      padding: 4px 10px;
+      padding: 3px 9px;
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid var(--border);
-      color: var(--text-main);
-      max-width: 210px;
+      color: var(--text-sub);
+      max-width: 190px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -130,48 +85,38 @@
 
     .top-actions {
       display: flex;
-      gap: 6px;
+      gap: 5px;
       align-items: center;
     }
 
     .mini-btn {
-      padding: 6px 10px;
-      border-radius: 10px;
+      padding: 5px 8px;
+      border-radius: 9px;
       border: 1px solid var(--border);
       background: var(--surface-elevated);
-      font-size: 0.68rem;
+      font-size: 0.66rem;
       font-weight: 700;
       color: var(--text-main);
       cursor: pointer;
-      transition: all 0.15s ease;
     }
 
-    .mini-btn:hover {
-      border-color: var(--border-strong);
-      transform: translateY(-1px);
+    .mini-btn:hover { border-color: var(--border-strong); }
+
+    .auth-box {
+      max-width: 390px;
+      margin: 8px auto 0;
     }
 
-    .mini-btn.admin {
-      border-color: rgba(129, 140, 248, 0.5);
-      background: rgba(99, 102, 241, 0.18);
-      color: #c7d2fe;
-    }
-
-    .google-btn, .submit-btn, .secondary-btn {
+    .google-btn, .submit-btn {
       width: 100%;
-      padding: 11px 14px;
-      border-radius: 13px;
-      font-size: 0.86rem;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 0.84rem;
       font-weight: 700;
       cursor: pointer;
-      transition: transform 0.12s ease, filter 0.15s ease, box-shadow 0.15s ease;
     }
 
     .google-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
       border: 1px solid var(--border);
       background: var(--surface-elevated);
       color: var(--text-main);
@@ -181,31 +126,15 @@
       border: none;
       background: var(--accent-grad);
       color: #ffffff;
-      box-shadow: 0 12px 24px -8px rgba(99, 102, 241, 0.6);
-    }
-
-    .secondary-btn {
-      border: 1px solid var(--border);
-      background: var(--surface-elevated);
-      color: var(--text-main);
-      margin-top: 8px;
-    }
-
-    .submit-btn:hover, .google-btn:hover, .secondary-btn:hover {
-      filter: brightness(1.06);
-    }
-
-    .submit-btn:active, .google-btn:active, .secondary-btn:active {
-      transform: scale(0.99);
     }
 
     .divider {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin: 14px 0;
+      margin: 12px 0;
       color: var(--text-muted);
-      font-size: 0.7rem;
+      font-size: 0.68rem;
     }
 
     .divider::before, .divider::after {
@@ -219,136 +148,78 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       background: var(--surface-soft);
-      padding: 4px;
-      border-radius: 13px;
+      padding: 3px;
+      border-radius: 11px;
       border: 1px solid var(--border);
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .mode-tab {
       border: none;
       background: transparent;
-      padding: 7px;
-      border-radius: 9px;
-      font-size: 0.78rem;
+      padding: 6px;
+      border-radius: 8px;
+      font-size: 0.76rem;
       font-weight: 700;
       color: var(--text-sub);
       cursor: pointer;
-      transition: all 0.15s ease;
     }
 
     .mode-tab.active {
       background: var(--surface-elevated);
       color: var(--text-main);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
 
-    .field {
-      margin-bottom: 10px;
-    }
+    .field { margin-bottom: 9px; }
 
     .field label {
       display: block;
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       font-weight: 700;
       color: var(--text-sub);
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
 
-    .field input, .field select, .field textarea {
+    .field input {
       width: 100%;
-      padding: 9px 11px;
-      border-radius: 11px;
+      padding: 8px 10px;
+      border-radius: 10px;
       border: 1px solid var(--border);
       background: var(--surface-soft);
       font-size: 0.84rem;
       color: var(--text-main);
       outline: none;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
-
-    .field input:focus, .field select:focus, .field textarea:focus {
-      border-color: var(--accent-2);
-      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
-    }
-
-    .field textarea {
-      min-height: 68px;
-      resize: vertical;
-      font-family: inherit;
-    }
-
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-
-    .parse-box {
-      background: rgba(99, 102, 241, 0.08);
-      border: 1px dashed rgba(129, 140, 248, 0.45);
-      border-radius: 16px;
-      padding: 12px;
-      margin-bottom: 12px;
-    }
-
-    .import-box {
-      background: rgba(52, 211, 153, 0.08);
-      border: 1px dashed rgba(52, 211, 153, 0.45);
-      border-radius: 16px;
-      padding: 12px;
-      margin-top: 14px;
-    }
-
-    .parse-btn, .import-btn {
-      margin-top: 6px;
-      padding: 8px 12px;
-      border: none;
-      border-radius: 10px;
-      color: #ffffff;
-      font-size: 0.74rem;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .parse-btn { background: #334155; }
-    .import-btn { background: #059669; }
 
     .guest-link {
       display: block;
       width: 100%;
-      margin-top: 12px;
+      margin-top: 10px;
       padding: 6px;
       border: none;
       background: transparent;
       color: var(--text-sub);
-      font-size: 0.76rem;
+      font-size: 0.74rem;
       cursor: pointer;
       text-decoration: underline;
-      text-underline-offset: 3px;
     }
-
-    .guest-link:hover { color: var(--text-main); }
 
     .action-bar {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 7px;
-      margin-bottom: 12px;
+      gap: 6px;
+      margin-bottom: 10px;
     }
 
     .action-btn {
-      font-size: 0.72rem;
-      padding: 8px 6px;
-      border-radius: 12px;
+      font-size: 0.7rem;
+      padding: 7px 6px;
+      border-radius: 11px;
       border: 1px solid var(--border);
       background: var(--surface-elevated);
       color: var(--text-main);
       font-weight: 700;
       cursor: pointer;
-      transition: all 0.14s ease;
-    }
-
-    .action-btn:hover {
-      border-color: var(--border-strong);
-      transform: translateY(-1px);
     }
 
     .btn-save { border-color: rgba(56, 189, 248, 0.35); color: #7dd3fc; }
@@ -357,53 +228,59 @@
 
     .filter-box {
       background: var(--surface-soft);
-      padding: 10px 9px;
-      border-radius: 16px;
+      padding: 9px 8px;
+      border-radius: 14px;
       border: 1px solid var(--border);
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
-    .filter-mode-switch {
+    .filter-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 6px;
       margin-bottom: 8px;
-      padding-bottom: 8px;
+      padding-bottom: 7px;
       border-bottom: 1px solid var(--border);
-    }
-
-    .filter-mode-switch label {
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: var(--text-sub);
     }
 
     .switch-btn-group {
       display: flex;
       background: var(--bg-base);
       padding: 2px;
-      border-radius: 9px;
+      border-radius: 8px;
       border: 1px solid var(--border);
     }
 
     .switch-btn {
-      font-size: 0.66rem;
-      padding: 4px 10px;
+      font-size: 0.65rem;
+      padding: 4px 9px;
       background: transparent;
       border: none;
-      border-radius: 7px;
+      border-radius: 6px;
       cursor: pointer;
       color: var(--text-sub);
       font-weight: 600;
-      transition: all 0.14s ease;
     }
 
     .switch-btn.active {
       background: var(--accent-grad);
       color: #ffffff;
       font-weight: 700;
-      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
     }
+
+    .reset-filter-btn {
+      font-size: 0.64rem;
+      padding: 4px 8px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--surface-elevated);
+      color: var(--text-sub);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .reset-filter-btn:hover { color: var(--text-main); }
 
     .filter-row {
       display: grid;
@@ -417,7 +294,7 @@
     }
 
     .filter-group label {
-      font-size: 0.62rem;
+      font-size: 0.6rem;
       font-weight: 700;
       color: var(--text-sub);
       margin-bottom: 3px;
@@ -425,77 +302,47 @@
     }
 
     .filter-group select {
-      font-size: 0.7rem;
-      padding: 4px 5px;
-      border-radius: 9px;
+      font-size: 0.68rem;
+      padding: 4px 4px;
+      border-radius: 8px;
       border: 1px solid var(--border);
       background: var(--surface-elevated);
       color: var(--text-main);
-      height: 30px;
+      height: 28px;
       outline: none;
     }
 
-    .filter-group select:focus {
-      border-color: var(--accent-2);
-    }
-
+    /* アイコンなしのコンパクト5枠スロット */
     .slot-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 6px;
-      margin-bottom: 12px;
+      gap: 5px;
+      margin-bottom: 10px;
     }
 
     .slot-card {
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 7px 3px 6px;
+      border-radius: 12px;
+      padding: 7px 3px;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: space-between;
+      gap: 5px;
       background: var(--surface-soft);
-      transition: border-color 0.15s ease, transform 0.15s ease;
+      min-height: 82px;
     }
 
     .slot-card.has-chara {
-      border-color: rgba(129, 140, 248, 0.5);
-      background: linear-gradient(180deg, rgba(99, 102, 241, 0.12) 0%, rgba(15, 23, 42, 0.72) 100%);
+      border-color: rgba(129, 140, 248, 0.55);
+      background: linear-gradient(180deg, rgba(99, 102, 241, 0.14) 0%, rgba(15, 23, 42, 0.78) 100%);
     }
 
-    .slot-icon-wrapper {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      overflow: hidden;
-      background: var(--surface-elevated);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      border: 2px solid rgba(148, 163, 184, 0.25);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-      transition: transform 0.14s ease, border-color 0.14s ease;
-    }
-
-    .slot-card.has-chara .slot-icon-wrapper {
-      border-color: var(--accent-2);
-    }
-
-    .slot-icon-wrapper:hover {
-      transform: scale(1.05);
-    }
-
-    .slot-icon {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .slot-no-icon {
+    .slot-label {
       font-size: 0.58rem;
       color: var(--text-muted);
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .slot-atk {
@@ -505,8 +352,8 @@
       background: rgba(56, 189, 248, 0.12);
       padding: 2px 5px;
       border-radius: 999px;
-      margin: 5px 0 4px;
       white-space: nowrap;
+      cursor: pointer;
     }
 
     .slot-select {
@@ -524,49 +371,46 @@
     .view-tabs {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
-      margin-bottom: 10px;
+      gap: 5px;
+      margin-bottom: 8px;
       background: var(--surface-soft);
-      padding: 4px;
-      border-radius: 13px;
+      padding: 3px;
+      border-radius: 12px;
       border: 1px solid var(--border);
     }
 
     .view-tab {
-      font-size: 0.7rem;
-      padding: 7px 4px;
+      font-size: 0.68rem;
+      padding: 6px 3px;
       text-align: center;
       background: transparent;
       border-radius: 9px;
       color: var(--text-sub);
       cursor: pointer;
       font-weight: 700;
-      transition: all 0.14s ease;
     }
 
     .view-tab.active {
       background: var(--accent-grad);
       color: #ffffff;
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
     }
 
     .compare-header {
       background: rgba(56, 189, 248, 0.1);
       border: 1px solid rgba(56, 189, 248, 0.3);
-      border-radius: 12px;
-      padding: 8px 10px;
-      margin-bottom: 10px;
+      border-radius: 11px;
+      padding: 7px 9px;
+      margin-bottom: 8px;
       display: none;
       align-items: center;
       justify-content: space-between;
-      font-size: 0.72rem;
-      color: var(--text-main);
+      font-size: 0.7rem;
     }
 
     .compare-header select {
-      font-size: 0.7rem;
-      padding: 4px 6px;
-      border-radius: 8px;
+      font-size: 0.68rem;
+      padding: 3px 6px;
+      border-radius: 7px;
       border: 1px solid var(--border);
       background: var(--surface-elevated);
       color: var(--text-main);
@@ -575,9 +419,9 @@
     .base-inputs-container {
       background: var(--surface-soft);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 10px;
-      margin-bottom: 10px;
+      border-radius: 12px;
+      padding: 8px;
+      margin-bottom: 8px;
       display: none;
     }
 
@@ -590,24 +434,27 @@
 
     .base-input-row:last-child { margin-bottom: 0; }
 
-    .base-input-thumb {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 1px solid var(--border);
+    .base-row-label {
+      width: 68px;
+      font-size: 0.64rem;
+      font-weight: 700;
+      color: var(--text-sub);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .base-stat-grid {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
-      gap: 4px;
+      gap: 3px;
       flex: 1;
     }
 
     .base-stat-input {
       width: 100%;
-      font-size: 0.66rem;
+      font-size: 0.64rem;
       padding: 4px 2px;
       text-align: center;
       border: 1px solid var(--border);
@@ -617,7 +464,7 @@
     }
 
     .table-wrap {
-      border-radius: 14px;
+      border-radius: 12px;
       overflow: hidden;
       border: 1px solid var(--border);
       background: var(--surface-soft);
@@ -626,14 +473,14 @@
     table.result-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       text-align: center;
     }
 
     table.result-table th {
       background: rgba(99, 102, 241, 0.22);
       color: #e0e7ff;
-      padding: 7px 2px;
+      padding: 6px 2px;
       font-weight: 700;
       border-bottom: 1px solid var(--border);
     }
@@ -643,41 +490,34 @@
       border-bottom: 1px solid rgba(148, 163, 184, 0.1);
     }
 
-    table.result-table tr:last-child td {
-      border-bottom: none;
-    }
+    table.result-table tr:last-child td { border-bottom: none; }
 
-    .table-icon {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      object-fit: cover;
-      display: inline-block;
-      vertical-align: middle;
-      border: 1.5px solid rgba(129, 140, 248, 0.45);
+    .chara-name-cell {
+      max-width: 84px;
+      padding-left: 4px !important;
+      padding-right: 4px !important;
+      font-size: 0.64rem;
+      font-weight: 700;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       cursor: pointer;
+      text-align: left !important;
     }
 
-    .compare-icon-cell {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 2px;
-    }
-
-    .compare-arrow { font-size: 0.6rem; color: var(--text-sub); }
     .val-cell { color: #fef08a; font-weight: 800; }
-    .diff-pos { color: #fb7185; font-size: 0.58rem; font-weight: 700; display: block; }
-    .diff-neg { color: #38bdf8; font-size: 0.58rem; font-weight: 700; display: block; }
-    .diff-eq { color: var(--text-muted); font-size: 0.58rem; display: block; }
+    .diff-pos { color: #fb7185; font-size: 0.56rem; font-weight: 700; display: block; }
+    .diff-neg { color: #38bdf8; font-size: 0.56rem; font-weight: 700; display: block; }
+    .diff-eq { color: var(--text-muted); font-size: 0.56rem; display: block; }
 
     .empty-msg {
       text-align: center;
       color: var(--text-sub);
-      padding: 18px 12px;
-      font-size: 0.76rem;
+      padding: 16px 10px;
+      font-size: 0.74rem;
       border: 1px solid var(--border);
-      border-radius: 14px;
+      border-radius: 12px;
       background: var(--surface-soft);
     }
 
@@ -686,7 +526,7 @@
       position: fixed;
       inset: 0;
       background: rgba(2, 6, 23, 0.75);
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(5px);
       justify-content: center;
       align-items: center;
       z-index: 1000;
@@ -697,47 +537,37 @@
       background: var(--surface-elevated);
       border: 1px solid var(--border-strong);
       color: var(--text-main);
-      padding: 18px 16px;
-      border-radius: 20px;
+      padding: 16px 14px;
+      border-radius: 18px;
       width: 100%;
       max-width: 340px;
       text-align: center;
-      box-shadow: 0 24px 50px rgba(0, 0, 0, 0.6);
     }
 
-    .modal-icon {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-bottom: 6px;
-      border: 2px solid var(--accent-2);
-    }
-
-    .modal-name { font-size: 1rem; font-weight: 800; margin: 0; }
-    .modal-sub { font-size: 0.72rem; color: var(--text-sub); margin: 4px 0 10px; }
+    .modal-name { font-size: 0.96rem; font-weight: 800; margin: 0; }
+    .modal-sub { font-size: 0.7rem; color: var(--text-sub); margin: 4px 0 10px; }
 
     .modal-stats {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 6px;
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       text-align: left;
       background: var(--surface-soft);
       border: 1px solid var(--border);
-      padding: 10px 12px;
-      border-radius: 12px;
+      padding: 9px 11px;
+      border-radius: 11px;
       margin-bottom: 10px;
     }
 
     .modal-range {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: var(--text-main);
       text-align: left;
       background: var(--surface-soft);
       border: 1px solid var(--border);
       padding: 8px 10px;
-      border-radius: 12px;
+      border-radius: 11px;
       margin-bottom: 12px;
       line-height: 1.45;
     }
@@ -746,9 +576,9 @@
       background: var(--accent-grad);
       color: #ffffff;
       border: none;
-      border-radius: 10px;
-      padding: 8px 20px;
-      font-size: 0.76rem;
+      border-radius: 9px;
+      padding: 7px 18px;
+      font-size: 0.74rem;
       cursor: pointer;
       font-weight: 700;
     }
@@ -756,16 +586,16 @@
     .slot-item-list {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 7px;
       margin: 10px 0;
-      max-height: 260px;
+      max-height: 250px;
       overflow-y: auto;
     }
 
     .slot-item-card {
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 8px 10px;
+      border-radius: 11px;
+      padding: 8px 9px;
       background: var(--surface-soft);
       text-align: left;
     }
@@ -774,37 +604,28 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
     }
 
-    .slot-item-title { font-size: 0.76rem; font-weight: 700; color: var(--accent-2); }
-    .slot-item-icons { display: flex; gap: 4px; }
-
-    .slot-mini-icon {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      object-fit: cover;
-      background: var(--surface-elevated);
-      border: 1px solid var(--border);
-    }
+    .slot-item-title { font-size: 0.74rem; font-weight: 700; color: var(--accent-2); }
+    .slot-item-summary { font-size: 0.64rem; color: var(--text-sub); line-height: 1.35; }
 
     .modal-input {
       width: 100%;
-      padding: 7px 9px;
-      font-size: 0.78rem;
+      padding: 6px 8px;
+      font-size: 0.76rem;
       border: 1px solid var(--border);
       border-radius: 8px;
       background: var(--bg-base);
       color: var(--text-main);
-      margin-top: 4px;
+      margin-top: 5px;
     }
 
     .status-msg {
-      margin-top: 10px;
-      font-size: 0.74rem;
-      line-height: 1.4;
-      min-height: 1.2em;
+      margin-top: 8px;
+      font-size: 0.7rem;
+      line-height: 1.35;
+      min-height: 1.1em;
       text-align: center;
       color: var(--text-sub);
     }
@@ -812,30 +633,26 @@
     .status-msg.error { color: var(--danger); }
     .status-msg.success { color: var(--success); }
 
-    .ad-footer {
-      margin-top: 16px;
-      text-align: center;
-      padding-top: 10px;
-      border-top: 1px solid var(--border);
-    }
-
-    .ad-label { font-size: 9px; color: var(--text-muted); margin-bottom: 4px; }
-
     .copyright-footer {
-      font-size: 0.64rem;
+      font-size: 0.62rem;
       color: var(--text-muted);
       text-align: center;
-      margin-top: 8px;
+      margin-top: 12px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
       line-height: 1.35;
     }
   </style>
 </head>
 <body>
   <main class="shell">
-    <div class="brand">
-      <div class="brand-badge">USP</div>
-      <h1>U-S-P パッシブ判定計算</h1>
-      <p id="subHeaderText">Firestore 連携（characters コレクション読込）</p>
+    <div class="header-row">
+      <h1 class="app-title">U-S-P パッシブ計算</h1>
+      <div class="top-actions">
+        <span class="user-chip" id="userChip">ゲスト</span>
+        <button type="button" class="mini-btn" id="reloadDataBtn">↻ 再読込</button>
+        <button type="button" class="mini-btn" id="authActionBtn">ログイン</button>
+      </div>
     </div>
 
     <div id="authSection" class="auth-box">
@@ -863,15 +680,6 @@
     </div>
 
     <div id="calcSection" style="display: none;">
-      <div class="top-bar">
-        <div class="user-chip" id="userChip">ゲスト利用中</div>
-        <div class="top-actions">
-          <button type="button" class="mini-btn admin" id="openAdminBtn" style="display: none;">🛠️ キャラ追加</button>
-          <button type="button" class="mini-btn" id="reloadDataBtn">↻ 再読込</button>
-          <button type="button" class="mini-btn" id="authActionBtn">ログイン画面</button>
-        </div>
-      </div>
-
       <div class="action-bar">
         <button type="button" class="action-btn btn-save" onclick="openSaveModal()">💾 PT保存</button>
         <button type="button" class="action-btn btn-load" onclick="openLoadModal()">📂 PT読込</button>
@@ -879,12 +687,12 @@
       </div>
 
       <div class="filter-box">
-        <div class="filter-mode-switch">
-          <label>🔍 絞り込み基準</label>
+        <div class="filter-top">
           <div class="switch-btn-group">
             <button type="button" id="modeCharaBtn" class="switch-btn active" onclick="setFilterMode('chara')">キャラ自身</button>
             <button type="button" id="modePassiveBtn" class="switch-btn" onclick="setFilterMode('passive')">パッシブ対象</button>
           </div>
+          <button type="button" class="reset-filter-btn" onclick="resetFilters()">条件リセット</button>
         </div>
 
         <div class="filter-row">
@@ -936,17 +744,17 @@
 
       <div class="view-tabs">
         <div id="tabPercent" class="view-tab active" onclick="setViewMode('percent')">補正率 (%)</div>
-        <div id="tabCompare" class="view-tab" onclick="setViewMode('compare')">⚖️ 保存PT比較</div>
-        <div id="tabStatCalc" class="view-tab" onclick="setViewMode('statCalc')">✏️ 実数値計算</div>
+        <div id="tabCompare" class="view-tab" onclick="setViewMode('compare')">保存PT比較</div>
+        <div id="tabStatCalc" class="view-tab" onclick="setViewMode('statCalc')">実数値計算</div>
       </div>
 
       <div id="compareHeaderArea" class="compare-header">
-        <span>🔍 比較対象枠:</span>
+        <span>比較対象枠:</span>
         <select id="compareSlotSelect" onchange="recalculatePassives()"></select>
       </div>
 
       <div id="baseStatInputsArea" class="base-inputs-container">
-        <div style="font-size:0.68rem; font-weight:bold; color:var(--text-sub); margin-bottom:6px;">自キャラの基礎ステータスを入力（攻撃/HP/防御/素早さ/SP/Crt）</div>
+        <div style="font-size:0.64rem; font-weight:700; color:var(--text-sub); margin-bottom:6px;">基礎ステータス（攻 / HP / 防 / 早 / SP / Crt）</div>
         <div id="statInputRows"></div>
       </div>
 
@@ -955,69 +763,8 @@
       </div>
     </div>
 
-    <div id="adminSection" style="display: none;">
-      <div class="top-bar">
-        <div class="user-chip">キャラ追加・一括移行</div>
-        <button type="button" class="mini-btn" id="backToCalcBtn">← 計算ツールへ戻る</button>
-      </div>
-
-      <div class="parse-box">
-        <div class="field" style="margin-bottom: 4px;">
-          <label for="wikiRawInput">Wikiのパッシブ文・数値を貼り付けて自動入力</label>
-          <textarea id="wikiRawInput" placeholder="例: 同じパーティに編成されている神族・飛天の下記の値がUP 攻撃+5% HP+25% 防御+10% SP+25%"></textarea>
-        </div>
-        <button type="button" class="parse-btn" id="parseWikiBtn">✨ テキストから自動入力</button>
-      </div>
-
-      <form id="addCharaForm">
-        <div class="field">
-          <label for="cName">名前（スプシA列）</label>
-          <input id="cName" type="text" required placeholder="例: アストラルヴィシュヌ" />
-        </div>
-        <div class="grid-2">
-          <div class="field">
-            <label for="cTribe">種族（スプシB列）</label>
-            <input id="cTribe" type="text" required placeholder="例: 神族" />
-          </div>
-          <div class="field">
-            <label for="cElement">属性（スプシC列）</label>
-            <input id="cElement" type="text" required placeholder="例: 闇属性" />
-          </div>
-        </div>
-        <div class="field">
-          <label for="cRange">パッシブ範囲（スプシD列）</label>
-          <input id="cRange" type="text" required placeholder="例: 同じパーティに編成されている神族の下記の値がUP" />
-        </div>
-        <div class="grid-3">
-          <div class="field"><label for="cAtk">攻撃 %（E列）</label><input id="cAtk" type="number" value="0" required /></div>
-          <div class="field"><label for="cDef">防御 %（F列）</label><input id="cDef" type="number" value="0" required /></div>
-          <div class="field"><label for="cSpd">素早 %（G列）</label><input id="cSpd" type="number" value="0" required /></div>
-          <div class="field"><label for="cHp">HP %（H列）</label><input id="cHp" type="number" value="0" required /></div>
-          <div class="field"><label for="cSp">SP %（I列）</label><input id="cSp" type="number" value="0" required /></div>
-          <div class="field"><label for="cCrt">Crt %（J列）</label><input id="cCrt" type="number" value="0" required /></div>
-        </div>
-        <div class="field">
-          <label for="cIcon">キャラアイコンURL（スプシK列）</label>
-          <input id="cIcon" type="url" placeholder="https://..." />
-        </div>
-        <button type="submit" class="submit-btn" id="saveCharaBtn">Firestore に保存する</button>
-      </form>
-
-      <div class="import-box">
-        <div class="field" style="margin-bottom: 4px;">
-          <label for="sheetBulkInput">📥 スプシから一括移行（A列〜K列をそのままコピペ）</label>
-          <textarea id="sheetBulkInput" placeholder="スプレッドシートのA〜K列を選択してコピーし、ここに貼り付けてください。"></textarea>
-        </div>
-        <button type="button" class="import-btn" id="bulkImportBtn">📥 一括インポート実行</button>
-      </div>
-    </div>
-
     <div id="statusMsg" class="status-msg" aria-live="polite"></div>
 
-    <div class="ad-footer">
-      <div class="ad-label">スポンサーリンク</div>
-      <div style="font-size:10px; color:var(--text-muted); padding:6px; border:1px dashed var(--border); border-radius:8px;">広告枠 (320×50px)</div>
-    </div>
     <div class="copyright-footer">
       当ツールは非公式であり、ゲーム内データの著作権は有限会社アイティルに帰属します
     </div>
@@ -1025,7 +772,6 @@
 
   <div id="detailModal" class="modal-overlay" onclick="closeModal('detailModal')">
     <div class="modal-content" onclick="event.stopPropagation()">
-      <img id="mIcon" class="modal-icon" src="" onerror="this.src='https://via.placeholder.com/64?text=NoImage'">
       <h3 id="mName" class="modal-name">-</h3>
       <div id="mSub" class="modal-sub">[種族] / [属性]</div>
       <div class="modal-stats">
@@ -1045,7 +791,7 @@
 
   <div id="saveModal" class="modal-overlay" onclick="closeModal('saveModal')">
     <div class="modal-content" onclick="event.stopPropagation()">
-      <h3 style="margin-top:0; font-size:0.95rem; color:var(--accent-2);">💾 パーティ保存 (5枠)</h3>
+      <h3 style="margin-top:0; font-size:0.9rem; color:var(--accent-2);">パーティ保存 (5枠)</h3>
       <div class="slot-item-list" id="saveSlotList"></div>
       <div style="display:flex; gap:6px; justify-content:center; margin-top:10px;">
         <button type="button" class="modal-close-btn" style="background:#334155;" onclick="closeModal('saveModal')">キャンセル</button>
@@ -1056,7 +802,7 @@
 
   <div id="loadModal" class="modal-overlay" onclick="closeModal('loadModal')">
     <div class="modal-content" onclick="event.stopPropagation()">
-      <h3 style="margin-top:0; font-size:0.95rem; color:var(--success);">📂 保存パーティの読込</h3>
+      <h3 style="margin-top:0; font-size:0.9rem; color:var(--success);">保存パーティの読込</h3>
       <div class="slot-item-list" id="loadSlotList"></div>
       <button type="button" class="modal-close-btn" style="background:#334155; margin-top:8px;" onclick="closeModal('loadModal')">閉じる</button>
     </div>
@@ -1076,11 +822,7 @@
     import {
       getFirestore,
       collection,
-      getDocs,
-      addDoc,
-      writeBatch,
-      doc,
-      serverTimestamp
+      getDocs
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -1097,8 +839,6 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     const googleProvider = new GoogleAuthProvider();
-
-    const ADMIN_EMAILS = ["miumiu04241997@nojobunoraifu.com"];
     const ALL_ELEMS = ["火", "水", "雷", "風", "光", "闇", "無"];
 
     let masterData = [];
@@ -1128,10 +868,8 @@
 
     const authSection = document.getElementById("authSection");
     const calcSection = document.getElementById("calcSection");
-    const adminSection = document.getElementById("adminSection");
     const userChip = document.getElementById("userChip");
     const statusMsg = document.getElementById("statusMsg");
-    const openAdminBtn = document.getElementById("openAdminBtn");
     const authActionBtn = document.getElementById("authActionBtn");
     const tabLogin = document.getElementById("tabLogin");
     const tabSignup = document.getElementById("tabSignup");
@@ -1144,12 +882,10 @@
       for (let i = 0; i < 5; i++) {
         html += `
           <div class="slot-card" id="slotCard_${i}">
-            <div class="slot-icon-wrapper" onclick="openDetailModal(${i})">
-              <div id="slotIconBox_${i}" class="slot-no-icon">+</div>
-            </div>
-            <div class="slot-atk" id="slotAtk_${i}">ATK +0%</div>
+            <div class="slot-label">枠${i + 1}</div>
+            <div class="slot-atk" id="slotAtk_${i}" onclick="openDetailModal(${i})">ATK +0%</div>
             <select class="slot-select" id="slotSelect_${i}" onchange="onSlotChange(${i})">
-              <option value="">--選${i + 1}--</option>
+              <option value="">--選択--</option>
             </select>
           </div>
         `;
@@ -1162,20 +898,11 @@
       statusMsg.className = `status-msg ${type}`.trim();
     }
 
-    function isAdminUser(user) {
-      if (!user || !user.email) return false;
-      return ADMIN_EMAILS.includes(user.email.toLowerCase());
-    }
-
     function parseNum(val) {
       if (val === null || val === undefined) return 0;
       if (typeof val === "number") return Number.isNaN(val) ? 0 : val;
       const num = parseFloat(String(val).replace(/[^0-9.-]/g, ""));
       return Number.isNaN(num) ? 0 : num;
-    }
-
-    function cleanCell(val) {
-      return String(val || "").replace(/^"|"$/g, "").replace(/\r?\n/g, " ").replace(/\s+/g, " ").trim();
     }
 
     function isTribeMatch(t1, t2) {
@@ -1215,7 +942,7 @@
     }
 
     async function loadCharactersFromFirestore() {
-      setStatus("Firestore からキャラデータを読み込み中...");
+      setStatus("Firestore から読み込み中...");
       try {
         const snap = await getDocs(collection(db, "characters"));
         const list = [];
@@ -1232,8 +959,7 @@
             spd: parseNum(d.spd),
             hp: parseNum(d.hp),
             sp: parseNum(d.sp),
-            crt: parseNum(d.crt),
-            icon: d.icon || ""
+            crt: parseNum(d.crt)
           });
         });
 
@@ -1242,37 +968,32 @@
 
         updateAllSelects();
         recalculatePassives();
-        setStatus(`Firestore から ${masterData.length} 件のキャラを読み込みました。`, "success");
+        setStatus(`${masterData.length} 件読込完了`, "success");
       } catch (err) {
         console.error(err);
         document.getElementById("tableContainer").innerHTML =
-          '<div class="empty-msg">Firestore データの読み込みに失敗しました。</div>';
-        setStatus(err.message || "データ読み込みに失敗しました。", "error");
+          '<div class="empty-msg">データの読み込みに失敗しました</div>';
+        setStatus(err.message || "読み込みエラー", "error");
       }
     }
 
     function showCalcView() {
       authSection.style.display = "none";
-      adminSection.style.display = "none";
       calcSection.style.display = "block";
     }
 
     function showAuthView() {
       authSection.style.display = "block";
       calcSection.style.display = "none";
-      adminSection.style.display = "none";
       setStatus("");
     }
 
-    function showAdminView() {
-      if (!currentUser || !isAdminUser(currentUser)) {
-        return setStatus("管理者アカウントでログインしてください。", "error");
-      }
-      authSection.style.display = "none";
-      calcSection.style.display = "none";
-      adminSection.style.display = "block";
-      setStatus("1件追加またはスプシからの一括移行ができます。");
-    }
+    window.resetFilters = function() {
+      document.getElementById("tribeFilter").value = "すべて";
+      document.getElementById("elementFilter").value = "すべて";
+      document.getElementById("sortFilter").value = "default";
+      updateAllSelects();
+    };
 
     window.setFilterMode = function(mode) {
       filterMode = mode;
@@ -1417,7 +1138,7 @@
         const sel = document.getElementById(`slotSelect_${i}`);
         if (!sel) continue;
         const currentVal = party[i];
-        sel.innerHTML = `<option value="">--選${i + 1}--</option>`;
+        sel.innerHTML = `<option value="">--選択--</option>`;
 
         filtered.forEach((item) => {
           const opt = document.createElement("option");
@@ -1449,16 +1170,11 @@
     function updateSlotCardUI(slotIdx) {
       const charaIdx = party[slotIdx];
       const card = document.getElementById(`slotCard_${slotIdx}`);
-      const iconBox = document.getElementById(`slotIconBox_${slotIdx}`);
+      if (!card) return;
       if (charaIdx === null || !masterData[charaIdx]) {
-        if (card) card.classList.remove("has-chara");
-        iconBox.className = "slot-no-icon";
-        iconBox.innerHTML = "+";
+        card.classList.remove("has-chara");
       } else {
-        if (card) card.classList.add("has-chara");
-        const chara = masterData[charaIdx];
-        iconBox.className = "";
-        iconBox.innerHTML = `<img class="slot-icon" src="${chara.icon || "https://via.placeholder.com/44?text=No"}" onerror="this.src='https://via.placeholder.com/44?text=No'">`;
+        card.classList.add("has-chara");
       }
     }
 
@@ -1507,7 +1223,7 @@
           <table class="result-table">
             <thead>
               <tr>
-                <th style="width:42px;">キャラ</th>
+                <th style="text-align:left; padding-left:6px;">キャラ</th>
                 <th>攻撃</th>
                 <th>HP</th>
                 <th>防御</th>
@@ -1521,7 +1237,7 @@
       results.forEach((res) => {
         html += `
           <tr>
-            <td><img class="table-icon" src="${res.chara.icon || "https://via.placeholder.com/32?text=No"}" onclick="openDetailModal(${res.slot})" onerror="this.src='https://via.placeholder.com/32?text=No'"></td>
+            <td class="chara-name-cell" title="${res.chara.name}" onclick="openDetailModal(${res.slot})">${res.chara.name}</td>
             <td class="val-cell">+${res.stats.atk}%</td>
             <td class="val-cell">+${res.stats.hp}%</td>
             <td class="val-cell">+${res.stats.def}%</td>
@@ -1541,7 +1257,7 @@
 
       if (!targetSlot || !targetSlot.party.some((p) => p !== null)) {
         document.getElementById("tableContainer").innerHTML =
-          `<div class="empty-msg">「${targetSlot ? targetSlot.name : "選択枠"}」には保存されたデータがありません</div>`;
+          `<div class="empty-msg">「${targetSlot ? targetSlot.name : "選択枠"}」には保存データがありません</div>`;
         return;
       }
 
@@ -1572,7 +1288,7 @@
           <table class="result-table">
             <thead>
               <tr>
-                <th style="width:74px;">編成比較</th>
+                <th style="text-align:left; padding-left:6px;">キャラ</th>
                 <th>攻撃</th>
                 <th>HP</th>
                 <th>防御</th>
@@ -1586,8 +1302,6 @@
 
       currentResults.forEach((res) => {
         const savedMatch = savedResults.find((s) => s.slot === res.slot);
-        const savedCharaIdx = targetSlot.party[res.slot];
-        const savedChara = savedCharaIdx !== null && masterData[savedCharaIdx] ? masterData[savedCharaIdx] : null;
         const sStats = savedMatch ? savedMatch.stats : { atk: 0, hp: 0, def: 0, spd: 0, sp: 0, crt: 0 };
 
         function renderDiff(cur, sav) {
@@ -1598,18 +1312,9 @@
           return `+${cur}% ${diffHtml}`;
         }
 
-        const curIconSrc = res.chara.icon || "https://via.placeholder.com/28?text=No";
-        const savIconSrc = savedChara ? savedChara.icon || "https://via.placeholder.com/28?text=No" : "https://via.placeholder.com/28?text=空";
-
         html += `
           <tr>
-            <td>
-              <div class="compare-icon-cell">
-                <img class="table-icon" src="${curIconSrc}" title="現在: ${res.chara.name}" onclick="openDetailModal(${res.slot})">
-                <span class="compare-arrow">➔</span>
-                <img class="table-icon" style="opacity:0.75;" src="${savIconSrc}" title="保存PT: ${savedChara ? savedChara.name : "未選択"}">
-              </div>
-            </td>
+            <td class="chara-name-cell" title="${res.chara.name}" onclick="openDetailModal(${res.slot})">${res.chara.name}</td>
             <td class="val-cell">${renderDiff(res.stats.atk, sStats.atk)}</td>
             <td class="val-cell">${renderDiff(res.stats.hp, sStats.hp)}</td>
             <td class="val-cell">${renderDiff(res.stats.def, sStats.def)}</td>
@@ -1633,7 +1338,7 @@
         const row = document.createElement("div");
         row.className = "base-input-row";
         row.innerHTML = `
-          <img class="base-input-thumb" src="${chara.icon || "https://via.placeholder.com/28?text=No"}">
+          <div class="base-row-label" title="${chara.name}">${chara.name}</div>
           <div class="base-stat-grid">
             <input type="number" class="base-stat-input" placeholder="攻" value="${baseStats[i].atk || ""}" oninput="updateBaseStat(${i}, 'atk', this.value)">
             <input type="number" class="base-stat-input" placeholder="HP" value="${baseStats[i].hp || ""}" oninput="updateBaseStat(${i}, 'hp', this.value)">
@@ -1658,7 +1363,7 @@
           <table class="result-table">
             <thead>
               <tr>
-                <th style="width:42px;">キャラ</th>
+                <th style="text-align:left; padding-left:6px;">キャラ</th>
                 <th>攻撃</th>
                 <th>HP</th>
                 <th>防御</th>
@@ -1674,7 +1379,7 @@
         const calcFinal = (base, pct) => (!base ? "-" : Math.floor(base * (1 + pct / 100)).toLocaleString());
         html += `
           <tr>
-            <td><img class="table-icon" src="${res.chara.icon || "https://via.placeholder.com/32?text=No"}" onclick="openDetailModal(${res.slot})" onerror="this.src='https://via.placeholder.com/32?text=No'"></td>
+            <td class="chara-name-cell" title="${res.chara.name}" onclick="openDetailModal(${res.slot})">${res.chara.name}</td>
             <td class="val-cell">${calcFinal(b.atk, res.stats.atk)}</td>
             <td class="val-cell">${calcFinal(b.hp, res.stats.hp)}</td>
             <td class="val-cell">${calcFinal(b.def, res.stats.def)}</td>
@@ -1688,28 +1393,29 @@
       document.getElementById("tableContainer").innerHTML = html;
     }
 
+    function getPartySummaryText(pArr) {
+      const names = pArr
+        .map((cIdx) => (cIdx !== null && masterData[cIdx] ? masterData[cIdx].name : null))
+        .filter(Boolean);
+      return names.length > 0 ? names.join(" / ") : "未設定";
+    }
+
     window.openSaveModal = function() {
-      if (!party.some((p) => p !== null)) return alert("保存するキャラが選択されていません！");
+      if (!party.some((p) => p !== null)) return alert("保存するキャラが選択されていません");
       const container = document.getElementById("saveSlotList");
       container.innerHTML = "";
       savedSlots.forEach((slot, idx) => {
         const card = document.createElement("div");
         card.className = "slot-item-card";
-        let iconsHtml = "";
-        slot.party.forEach((cIdx) => {
-          const chara = cIdx !== null && masterData[cIdx] ? masterData[cIdx] : null;
-          const src = chara ? chara.icon || "https://via.placeholder.com/24?text=No" : "https://via.placeholder.com/24?text=";
-          iconsHtml += `<img class="slot-mini-icon" src="${src}">`;
-        });
         const checked = selectedSaveTargetSlot === idx ? "checked" : "";
         card.innerHTML = `
           <div class="slot-item-header">
-            <label style="font-size:0.75rem; font-weight:bold;">
+            <label style="font-size:0.74rem; font-weight:700;">
               <input type="radio" name="saveTarget" value="${idx}" ${checked} onchange="setSaveTarget(${idx})"> 枠 ${idx + 1}
             </label>
-            <div class="slot-item-icons">${iconsHtml}</div>
           </div>
-          <input type="text" class="modal-input" id="slotNameInput_${idx}" value="${slot.name}" placeholder="パーティ名を入力">
+          <div class="slot-item-summary">${getPartySummaryText(slot.party)}</div>
+          <input type="text" class="modal-input" id="slotNameInput_${idx}" value="${slot.name}" placeholder="パーティ名">
         `;
         container.appendChild(card);
       });
@@ -1732,7 +1438,7 @@
       localStorage.setItem("usp_saved_slots_v1", JSON.stringify(savedSlots));
       updateCompareHeaderSelect();
       closeModal("saveModal");
-      alert(`枠${selectedSaveTargetSlot + 1} [${slotName}] に保存しました！`);
+      setStatus(`枠${selectedSaveTargetSlot + 1} [${slotName}] に保存しました`, "success");
     };
 
     window.openLoadModal = function() {
@@ -1741,20 +1447,13 @@
       savedSlots.forEach((slot, idx) => {
         const card = document.createElement("div");
         card.className = "slot-item-card";
-        let iconsHtml = "";
-        let count = 0;
-        slot.party.forEach((cIdx) => {
-          if (cIdx !== null) count++;
-          const chara = cIdx !== null && masterData[cIdx] ? masterData[cIdx] : null;
-          const src = chara ? chara.icon || "https://via.placeholder.com/24?text=No" : "https://via.placeholder.com/24?text=";
-          iconsHtml += `<img class="slot-mini-icon" src="${src}">`;
-        });
+        const count = slot.party.filter((p) => p !== null).length;
         card.innerHTML = `
           <div class="slot-item-header">
             <div class="slot-item-title">${slot.name} (${count}/5体)</div>
-            <button type="button" class="action-btn btn-load" style="flex:none; padding:3px 9px;" ${count === 0 ? "disabled" : ""} onclick="loadSlot(${idx})">読込</button>
+            <button type="button" class="action-btn btn-load" style="padding:3px 9px;" ${count === 0 ? "disabled" : ""} onclick="loadSlot(${idx})">読込</button>
           </div>
-          <div class="slot-item-icons">${iconsHtml}</div>
+          <div class="slot-item-summary">${getPartySummaryText(slot.party)}</div>
         `;
         container.appendChild(card);
       });
@@ -1771,7 +1470,7 @@
       if (currentView === "statCalc") renderStatInputRows();
       recalculatePassives();
       closeModal("loadModal");
-      alert(`[${target.name}] を読み込みました！`);
+      setStatus(`[${target.name}] を読み込みました`, "success");
     };
 
     function updateCompareHeaderSelect() {
@@ -1798,7 +1497,6 @@
       const charaIdx = party[slotIdx];
       if (charaIdx === null || !masterData[charaIdx]) return;
       const chara = masterData[charaIdx];
-      document.getElementById("mIcon").src = chara.icon || "https://via.placeholder.com/64?text=NoImage";
       document.getElementById("mName").textContent = chara.name;
       document.getElementById("mSub").textContent = `[${chara.tribe || "種族不明"}] / [${chara.element || "属性不明"}]`;
       document.getElementById("mAtk").textContent = `${chara.atk}%`;
@@ -1839,7 +1537,7 @@
         isGuestMode = false;
         await signInWithPopup(auth, googleProvider);
       } catch (err) {
-        setStatus(err.message || "Googleログインに失敗しました。", "error");
+        setStatus(err.message || "Googleログインに失敗しました", "error");
       }
     });
 
@@ -1847,24 +1545,22 @@
       e.preventDefault();
       const email = document.getElementById("emailInput").value.trim();
       const password = passwordInput.value;
-      setStatus(isSignupMode ? "アカウントを作成中..." : "ログイン中...");
+      setStatus(isSignupMode ? "作成中..." : "ログイン中...");
       try {
         isGuestMode = false;
         if (isSignupMode) {
           await createUserWithEmailAndPassword(auth, email, password);
-          setStatus("アカウントを作成しました！", "success");
         } else {
           await signInWithEmailAndPassword(auth, email, password);
         }
       } catch (err) {
-        setStatus(err.message || "認証に失敗しました。", "error");
+        setStatus(err.message || "認証に失敗しました", "error");
       }
     });
 
     document.getElementById("guestEnterBtn").addEventListener("click", () => {
       isGuestMode = true;
-      userChip.textContent = "ゲスト利用中";
-      openAdminBtn.style.display = "none";
+      userChip.textContent = "ゲスト";
       authActionBtn.textContent = "ログイン";
       showCalcView();
       if (masterData.length === 0) loadCharactersFromFirestore();
@@ -1882,173 +1578,17 @@
       loadCharactersFromFirestore();
     });
 
-    openAdminBtn.addEventListener("click", showAdminView);
-    document.getElementById("backToCalcBtn").addEventListener("click", () => {
-      showCalcView();
-      loadCharactersFromFirestore();
-    });
-
-    document.getElementById("parseWikiBtn").addEventListener("click", () => {
-      const raw = document.getElementById("wikiRawInput").value || "";
-      if (!raw.trim()) return setStatus("解析するテキストを貼り付けてください。", "error");
-
-      const extractStat = (labels) => {
-        for (const label of labels) {
-          const m = raw.match(new RegExp(`${label}\\s*[+＋]?\\s*(\\d+)\\s*%?`, "i"));
-          if (m) return Number(m[1]);
-        }
-        return null;
-      };
-
-      const atk = extractStat(["攻撃", "ATK"]);
-      const def = extractStat(["防御", "DEF"]);
-      const spd = extractStat(["素早さ", "素早", "SPD"]);
-      const hp = extractStat(["HP"]);
-      const sp = extractStat(["SP"]);
-      const crt = extractStat(["Crt", "CRT", "クリティカル"]);
-
-      if (atk !== null) document.getElementById("cAtk").value = atk;
-      if (def !== null) document.getElementById("cDef").value = def;
-      if (spd !== null) document.getElementById("cSpd").value = spd;
-      if (hp !== null) document.getElementById("cHp").value = hp;
-      if (sp !== null) document.getElementById("cSp").value = sp;
-      if (crt !== null) document.getElementById("cCrt").value = crt;
-
-      const rangeMatch = raw.match(/([^。\n]*?(?:編成されている|味方|自身|属性|種族)[^。\n]*?(?:UP|アップ)?)/);
-      if (rangeMatch && rangeMatch[1].trim()) {
-        document.getElementById("cRange").value = cleanCell(rangeMatch[1]);
-      }
-
-      setStatus("テキストから数値を自動入力しました。", "success");
-    });
-
-    document.getElementById("addCharaForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      if (!currentUser || !isAdminUser(currentUser)) {
-        return setStatus("管理者アカウントでログインしてください。", "error");
-      }
-
-      const payload = {
-        name: cleanCell(document.getElementById("cName").value),
-        tribe: cleanCell(document.getElementById("cTribe").value),
-        element: cleanCell(document.getElementById("cElement").value),
-        range: cleanCell(document.getElementById("cRange").value),
-        atk: parseNum(document.getElementById("cAtk").value),
-        def: parseNum(document.getElementById("cDef").value),
-        spd: parseNum(document.getElementById("cSpd").value),
-        hp: parseNum(document.getElementById("cHp").value),
-        sp: parseNum(document.getElementById("cSp").value),
-        crt: parseNum(document.getElementById("cCrt").value),
-        icon: cleanCell(document.getElementById("cIcon").value),
-        updatedAt: serverTimestamp()
-      };
-
-      setStatus("Firestore に保存中...");
-      try {
-        await addDoc(collection(db, "characters"), payload);
-        setStatus(`「${payload.name}」を Firestore に保存しました！`, "success");
-        document.getElementById("addCharaForm").reset();
-        document.getElementById("wikiRawInput").value = "";
-      } catch (err) {
-        setStatus(err.message || "保存に失敗しました。", "error");
-      }
-    });
-
-    function parseSheetRows(rawText) {
-      const rows = [];
-      let currentRow = [];
-      let currentCell = "";
-      let inQuotes = false;
-
-      for (let i = 0; i < rawText.length; i++) {
-        const ch = rawText[i];
-        const next = rawText[i + 1];
-        if (ch === '"') {
-          if (inQuotes && next === '"') {
-            currentCell += '"';
-            i++;
-          } else {
-            inQuotes = !inQuotes;
-          }
-        } else if (ch === "\t" && !inQuotes) {
-          currentRow.push(currentCell);
-          currentCell = "";
-        } else if ((ch === "\n" || (ch === "\r" && next === "\n")) && !inQuotes) {
-          if (ch === "\r") i++;
-          currentRow.push(currentCell);
-          rows.push(currentRow);
-          currentRow = [];
-          currentCell = "";
-        } else if (ch === "\r" && !inQuotes) {
-          currentRow.push(currentCell);
-          rows.push(currentRow);
-          currentRow = [];
-          currentCell = "";
-        } else {
-          currentCell += ch;
-        }
-      }
-      if (currentCell.length > 0 || currentRow.length > 0) {
-        currentRow.push(currentCell);
-        rows.push(currentRow);
-      }
-
-      return rows
-        .map((cols) => {
-          const name = cleanCell(cols[0]);
-          if (!name || name === "名前") return null;
-          return {
-            name,
-            tribe: cleanCell(cols[1]),
-            element: cleanCell(cols[2]),
-            range: cleanCell(cols[3]),
-            atk: parseNum(cols[4]),
-            def: parseNum(cols[5]),
-            spd: parseNum(cols[6]),
-            hp: parseNum(cols[7]),
-            sp: parseNum(cols[8]),
-            crt: parseNum(cols[9]),
-            icon: cleanCell(cols[10]),
-            updatedAt: serverTimestamp()
-          };
-        })
-        .filter(Boolean);
-    }
-
-    document.getElementById("bulkImportBtn").addEventListener("click", async () => {
-      if (!currentUser || !isAdminUser(currentUser)) {
-        return setStatus("管理者アカウントでログインしてください。", "error");
-      }
-      const items = parseSheetRows(document.getElementById("sheetBulkInput").value || "");
-      if (items.length === 0) return setStatus("移行できるデータが見つかりませんでした。", "error");
-
-      setStatus(`${items.length} 件を Firestore に移行中...`);
-      try {
-        for (let i = 0; i < items.length; i += 400) {
-          const batch = writeBatch(db);
-          items.slice(i, i + 400).forEach((item) => {
-            batch.set(doc(collection(db, "characters")), item);
-          });
-          await batch.commit();
-        }
-        setStatus(`${items.length} 件のキャラデータを移行しました！`, "success");
-        document.getElementById("sheetBulkInput").value = "";
-      } catch (err) {
-        setStatus(err.message || "一括移行に失敗しました。", "error");
-      }
-    });
-
     onAuthStateChanged(auth, (user) => {
       currentUser = user;
       if (user) {
         isGuestMode = false;
         userChip.textContent = user.email || user.displayName || "ログイン中";
-        openAdminBtn.style.display = isAdminUser(user) ? "inline-block" : "none";
         authActionBtn.textContent = "ログアウト";
         showCalcView();
         loadCharactersFromFirestore();
       } else if (!isGuestMode) {
-        openAdminBtn.style.display = "none";
+        userChip.textContent = "ゲスト";
+        authActionBtn.textContent = "ログイン";
         showAuthView();
       }
     });
